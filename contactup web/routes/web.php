@@ -16,3 +16,4 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [App\Http\Controllers\contactController::class, "index"]);
 
 Route::post('/contact', [App\Http\Controllers\contactController::class, "store"]);
+Route::get('/delcontact/{contact}', [App\Http\Controllers\contactController::class, "destroyMob"]);

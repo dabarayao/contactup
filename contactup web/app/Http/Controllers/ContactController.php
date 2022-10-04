@@ -101,6 +101,17 @@ class ContactController extends Controller
      * @param  \App\Models\contact  $contact
      * @return \Illuminate\Http\Response
      */
+    public function destroyMob(contact $contact)
+    {
+        //
+        if ($contact != null) {
+            $contact->delete();
+            return "ok";
+        } else {
+            return "error";
+        }
+    }
+
     public function destroy(contact $contact)
     {
         //

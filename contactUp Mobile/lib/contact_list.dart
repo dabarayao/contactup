@@ -68,8 +68,17 @@ class _ContactListState extends State<ContactList> {
     super.initState();
   }
 
+  var internetOk = false;
+
   @override
   Widget build(BuildContext context) {
+    /* http.get(Uri.parse('http://10.0.2.2:8000/')).whenComplete(() {
+      internetOk = true;
+    }).timeout(const Duration(seconds: 2), onTimeout: () {
+      internetOk = false;
+      throw ("big error 404");
+    }); */
+
     return Center(
       child: FutureBuilder<List<Contact>>(
         future: fetchContacts(http.Client()),

@@ -1,3 +1,5 @@
+// ignore_for_file: sort_child_properties_last
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -33,34 +35,16 @@ class _ViewContactState extends State<ViewContact> {
    The future takes all the datas in the form and send them to a server in order to be saved
 */
 
-  Future<void> createContact(
-      nom, prenoms, email, phone, upimage, context) async {
-    var postUri = Uri.parse(
-        "http://10.0.2.2:8000/contact"); // this variable catches the url of the server where the contact will be saved
-
-    http.MultipartRequest request = http.MultipartRequest("POST",
-        postUri); // this http mulipartrequest variable creates a post instance to the server
-
-    // the datas which will be sent to the server
-    request.fields["nom"] = nom;
-    request.fields["prenoms"] = prenoms;
-    request.fields["email"] = email;
-    request.fields["phone"] = phone;
-
-    if (upimage != null) {
-      List<int> imageBytes = await upimage.readAsBytes();
-      baseimage = base64Encode(imageBytes);
-
-      http.MultipartFile multipartFile =
-          await http.MultipartFile.fromPath('image', upimage!.path);
-      request.files.add(multipartFile);
-    }
-
-    // this http streamresponse variable make it possible to send all data to the server if everything is ok
-    // ignore: unused_local_variable
-    final http.StreamedResponse response = await request.send();
+  Future<void> delContact(http.Client client, contactId) async {
+    final response = await client
+        .get(Uri.parse('http://10.0.2.2:8000/delcontact/$contactId'), headers: {
+      "Connection": "Keep-Alive",
+      "Keep-Alive": "timeout=5, max=1000"
+    });
 
     Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+
+    // Use the compute function to run parsePhotos in a separate isolate.
   }
 
 /*
@@ -107,12 +91,61 @@ class _ViewContactState extends State<ViewContact> {
           title: const Text("Détails du contact"),
           backgroundColor: Color(0XFF1F1F30),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.more_vert, size: 28),
-              color: Colors.white,
-              onPressed: () {
-                // Respond to icon toggle
+            PopupMenuButton(
+              onSelected: (value) {
+                print("the value is ${value}");
+
+                if (value == "delete") {
+                  showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: const Text('Suppression 🗑️'),
+                      content: const Text(
+                          'Etes-vous sûre de vouloir supprimer ce contact?'),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'OK'),
+                          child: const Text('Annuler'),
+                        ),
+                        TextButton(
+                          onPressed: () =>
+                              delContact(http.Client(), routes['id']),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
               },
+              icon: const Icon(Icons.more_vert),
+              itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+                PopupMenuItem(
+                  // ignore: prefer_const_literals_to_create_immutables
+                  child: Row(children: [
+                    const Icon(Icons.favorite, color: Color(0xFFF2B538)),
+                    const Text(' Ajouter au favoris'),
+                  ]),
+                  value: 'favs',
+                ),
+                const PopupMenuDivider(),
+                PopupMenuItem(
+                  // ignore: prefer_const_literals_to_create_immutables
+                  child: Row(children: [
+                    const Icon(Icons.edit, color: Color(0XFF1F1F30)),
+                    const Text(' Modifier'),
+                  ]),
+                  value: 'edit',
+                ),
+                const PopupMenuDivider(),
+                PopupMenuItem(
+                  // ignore: prefer_const_literals_to_create_immutables
+                  child: Row(children: [
+                    const Icon(Icons.delete, color: Color(0xFFff474c)),
+                    const Text(' Supprimer'),
+                  ]),
+                  value: 'delete',
+                ),
+              ],
             )
           ]),
       body: Padding(
@@ -134,6 +167,12 @@ class _ViewContactState extends State<ViewContact> {
                           width: 200,
                           child: CachedNetworkImage(
                             imageUrl: routes['photo']!,
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                            errorWidget: (context, url, error) => Icon(
+                                Icons.person,
+                                size: 120,
+                                color: Colors.grey),
                           ) //load image from file
                           ),
                       Text(
