@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -101,11 +102,20 @@ class _AddContactState extends State<AddContact> {
 
   @override
   Widget build(BuildContext context) {
+    var routesArg = ModalRoute.of(context)!.settings.arguments
+        as Map?; // variable to catch the route's arguments
+
+    if (routesArg != null) {
+      uploadimage = routesArg["photo"];
+    }
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text("Ajouter un contact"),
+        title: routesArg == null
+            ? Text("Ajouter un contact")
+            : Text("Modifier un contact"),
         backgroundColor: Color(0XFF1F1F30),
       ),
       body: Padding(
@@ -122,18 +132,29 @@ class _AddContactState extends State<AddContact> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: uploadimage != null
-                    ? SizedBox(
-                        height: 120,
-                        child: Image.file(
-                          File(uploadimage!.path),
-                        ) //load image from file
-                        )
-                    : const Text(""),
-              ),
+                  padding: const EdgeInsets.all(10.0),
+                  child: (uploadimage != null
+                      ? SizedBox(
+                          height: 120,
+                          child: uploadimage is String
+                              ? CachedNetworkImage(
+                                  imageUrl: uploadimage,
+                                  placeholder: (context, url) =>
+                                      CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) => Icon(
+                                      Icons.person,
+                                      size: 120,
+                                      color: Colors.grey),
+                                )
+                              : Image.file(
+                                  File(uploadimage!.path),
+                                ) //load image from file
+                          )
+                      : const Text(""))),
               TextFormField(
-                controller: lastNamesController,
+                controller: routesArg == null
+                    ? lastNamesController
+                    : TextEditingController(text: routesArg['nom']),
                 maxLines: 1, // want getLastNames() here but can't
                 decoration: const InputDecoration(
                   labelText: 'Nom',
@@ -160,7 +181,9 @@ class _AddContactState extends State<AddContact> {
                 height: 20,
               ),
               TextFormField(
-                controller: firstNamesController,
+                controller: routesArg == null
+                    ? firstNamesController
+                    : TextEditingController(text: routesArg['prenoms']),
                 decoration: const InputDecoration(
                   labelText: 'Prénoms',
                   focusedBorder: OutlineInputBorder(
@@ -186,7 +209,9 @@ class _AddContactState extends State<AddContact> {
                 height: 30,
               ),
               TextFormField(
-                controller: phoneNumberTemplateController,
+                controller: routesArg == null
+                    ? phoneNumberTemplateController
+                    : TextEditingController(text: routesArg['phone']),
                 decoration: const InputDecoration(
                   labelText: 'Téléphone',
                   focusedBorder: OutlineInputBorder(
@@ -212,7 +237,9 @@ class _AddContactState extends State<AddContact> {
                 height: 20,
               ),
               TextFormField(
-                controller: emailAddressTemplateController,
+                controller: routesArg == null
+                    ? emailAddressTemplateController
+                    : TextEditingController(text: routesArg['email']),
                 decoration: const InputDecoration(
                   labelText: 'Email',
                   focusedBorder: OutlineInputBorder(

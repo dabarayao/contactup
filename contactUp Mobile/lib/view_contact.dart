@@ -34,7 +34,7 @@ class _ViewContactState extends State<ViewContact> {
   /* Future to create the contacts.
    The future takes all the datas in the form and send them to a server in order to be saved
 */
-
+  // future to delete the contact
   Future<void> delContact(http.Client client, contactId) async {
     final response = await client
         .get(Uri.parse('http://10.0.2.2:8000/delcontact/$contactId'), headers: {
@@ -82,7 +82,8 @@ class _ViewContactState extends State<ViewContact> {
 
   @override
   Widget build(BuildContext context) {
-    var routes = ModalRoute.of(context)!.settings.arguments as Map;
+    var routesArg = ModalRoute.of(context)!.settings.arguments
+        as Map; // variable to catch the route's arguments
 
     return Scaffold(
       appBar: AppBar(
@@ -109,12 +110,21 @@ class _ViewContactState extends State<ViewContact> {
                         ),
                         TextButton(
                           onPressed: () =>
-                              delContact(http.Client(), routes['id']),
+                              delContact(http.Client(), routesArg['id']),
                           child: const Text('OK'),
                         ),
                       ],
                     ),
                   );
+                } else if (value == "edit") {
+                  Navigator.pushNamed(context, '/addContact', arguments: {
+                    'id': routesArg['id'],
+                    'nom': routesArg['nom'],
+                    'prenoms': routesArg['prenoms'],
+                    'email': routesArg['email'],
+                    'phone': routesArg['phone'],
+                    'photo': routesArg['photo'],
+                  });
                 }
               },
               icon: const Icon(Icons.more_vert),
@@ -166,7 +176,7 @@ class _ViewContactState extends State<ViewContact> {
                       SizedBox(
                           width: 200,
                           child: CachedNetworkImage(
-                            imageUrl: routes['photo']!,
+                            imageUrl: routesArg['photo']!,
                             placeholder: (context, url) =>
                                 CircularProgressIndicator(),
                             errorWidget: (context, url, error) => Icon(
@@ -176,7 +186,7 @@ class _ViewContactState extends State<ViewContact> {
                           ) //load image from file
                           ),
                       Text(
-                        """${StringUtils.capitalize(routes['prenoms']!)} \n ${StringUtils.capitalize(routes['nom']!)}""",
+                        """${StringUtils.capitalize(routesArg['prenoms']!)} \n ${StringUtils.capitalize(routesArg['nom']!)}""",
                         style: const TextStyle(fontSize: 20),
                         textAlign: TextAlign.center,
                       )
@@ -193,7 +203,7 @@ class _ViewContactState extends State<ViewContact> {
                   size: 28,
                   color: Color(0xFFF2B538),
                 ),
-                title: Text('${routes['phone']!}'),
+                title: Text('${routesArg['phone']!}'),
                 subtitle: const Text('Mobile'),
                 trailing: IconButton(
                     icon: const Icon(
@@ -211,7 +221,7 @@ class _ViewContactState extends State<ViewContact> {
                   size: 28,
                   color: Color(0xFFF2B538),
                 ),
-                title: Text('${routes['email']!}'),
+                title: Text('${routesArg['email']!}'),
                 subtitle: const Text('Email'),
               ),
             )

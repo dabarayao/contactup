@@ -134,6 +134,7 @@ class ContactsItems extends StatelessWidget {
           trailing: IconButton(
               icon: const Icon(Icons.remove_red_eye),
               onPressed: () {
+                // push to a new route with some parameters
                 Navigator.pushNamed(context, '/viewContact', arguments: {
                   'id': contacts[index].id,
                   'nom': contacts[index].nom,
