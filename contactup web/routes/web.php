@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [App\Http\Controllers\contactController::class, "index"]);
+Route::get('/', [App\Http\Controllers\contactController::class, "index"])->name("home");
 
 Route::post('/contact', [App\Http\Controllers\contactController::class, "store"]);
+Route::post('/contact/edit/{contact}', [App\Http\Controllers\contactController::class, "update"]);
 Route::get('/delcontact/{contact}', [App\Http\Controllers\contactController::class, "destroyMob"]);

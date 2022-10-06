@@ -59,6 +59,8 @@ class ContactController extends Controller
         $contact->phone = $request->phone;
         $contact->photo = $path != null ? $path : null;
         $contact->save();
+
+        return redirect()->route('home');
     }
 
     /**
@@ -93,6 +95,24 @@ class ContactController extends Controller
     public function update(UpdatecontactRequest $request, contact $contact)
     {
         //
+        $path = NULL;
+
+        if ($request->hasFile("image")) {
+
+
+            $picture = Storage::putFile('public/contact', $request->image);
+            $path = Storage::url($picture);
+        }
+
+
+        $contact->nom = $request->nom;
+        $contact->prenoms = $request->prenoms;
+        $contact->email = $request->email;
+        $contact->phone = $request->phone;
+        if ($path != null) {
+            $contact->photo = $path;
+        }
+        $contact->save();
     }
 
     /**
