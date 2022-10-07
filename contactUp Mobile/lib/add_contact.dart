@@ -139,29 +139,32 @@ class _AddContactState extends State<AddContact> {
       context: context,
       builder: (BuildContext context) => AlertDialog(
         title: const Text('Choisissez une image'),
-        content: Column(
-          children: [
-            TextButton.icon(
-              onPressed: () {
-                // Respond to button press
-                chooseImage(context);
-              },
-              icon: const Icon(Icons.image, size: 18),
-              label: const Text("Aller à gallery"),
-            ),
-            TextButton.icon(
-              onPressed: () {
-                // Respond to button press
-                captureImage(context);
-              },
-              icon: const Icon(Icons.camera_enhance, size: 18),
-              label: const Text("Prendre une photo"),
-            )
-          ],
+        content: SizedBox(
+          height: 100,
+          child: Column(
+            children: [
+              TextButton.icon(
+                onPressed: () {
+                  // Respond to button press
+                  chooseImage(context);
+                },
+                icon: const Icon(Icons.image, size: 18),
+                label: const Text("Aller à gallery"),
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  // Respond to button press
+                  captureImage(context);
+                },
+                icon: const Icon(Icons.camera_enhance, size: 18),
+                label: const Text("Prendre une photo"),
+              )
+            ],
+          ),
         ),
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.pop(context, 'OK'),
+            onPressed: () => Navigator.pop(context, 'Fermer'),
             child: const Text('OK'),
           ),
         ],
@@ -189,6 +192,9 @@ class _AddContactState extends State<AddContact> {
         ? TextEditingController()
         : TextEditingController(text: routesArg['email']);
 
+    /* if routesArg is null and uploadimage.runtimeType is Xfile we give the link of existing photo on the server.
+    This means the photo haven't been uploaded.
+    */
     if (routesArg != null &&
         uploadimage.runtimeType != XFile &&
         uploadCancelled != true) {
@@ -199,7 +205,8 @@ class _AddContactState extends State<AddContact> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: routesArg == null
+        title: routesArg ==
+                null // if routesArg is null we display a title for addinf contacts else we display a title for modidfing contacts
             ? Text("Ajouter un contact")
             : Text("Modifier un contact"),
         backgroundColor: Color(0XFF1F1F30),
@@ -224,7 +231,8 @@ class _AddContactState extends State<AddContact> {
                           children: [
                             SizedBox(
                                 height: 120,
-                                child: uploadimage is XFile
+                                child: uploadimage
+                                        is XFile // when the variable is string it isn't an upload file
                                     ? Image.file(
                                         File(uploadimage!.path),
                                       )
@@ -367,6 +375,7 @@ class _AddContactState extends State<AddContact> {
               ),
               uploadimage == null
                   ? TextButton.icon(
+                      // this widget suggest to pick image when there isn't
                       onPressed: () {
                         // Respond to button press
                         imageBrowse();
@@ -411,6 +420,7 @@ class _AddContactState extends State<AddContact> {
                           throw ("big error 404"); // Request Timeout response status code
                         },
                       ).whenComplete(() {
+                        // if routes args is null, it is we use the future createContact else we use the future updateContact
                         if (routesArg == null) {
                           createContact(
                               lastNamesController.text,

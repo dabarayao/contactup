@@ -47,6 +47,62 @@ class _MyAppState extends State<MyApp> {
                   })
                 ],
               ),
+              drawer: Drawer(
+                // Add a ListView to the drawer. This ensures the user can scroll
+                // through the options in the drawer if there isn't enough vertical
+                // space to fit everything.
+                child: ListView(
+                  // Important: Remove any padding from the ListView.
+                  padding: EdgeInsets.zero,
+                  children: [
+                    const DrawerHeader(
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: AssetImage("pictures/contact_up.png"),
+                              fit: BoxFit.cover)),
+                      child: Text(""),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.home_outlined),
+                      title: const Text('Accueil'),
+                      selected: true,
+                      selectedColor: const Color(0xFFF2B538),
+                      selectedTileColor:
+                          const Color(0xFFF2B538).withOpacity(0.2),
+                      onTap: () {
+                        // Update the state of the app.
+                        // ...
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/addContact');
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.favorite_outline),
+                      title: const Text('Mes favoris'),
+                      onTap: () {
+                        // Update the state of the app.
+                        // ...
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.info_outlined),
+                      title: const Text('A propos'),
+                      onTap: () {
+                        // Update the state of the app.
+                        // ...
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.settings_outlined),
+                      title: const Text('Paramètres'),
+                      onTap: () {
+                        // Update the state of the app.
+                        // ...
+                      },
+                    ),
+                  ],
+                ),
+              ),
               body: ContactList(),
             ),
         // When navigating to the "/addContact" route, build the  AddContact widget.

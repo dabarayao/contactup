@@ -67,6 +67,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - pictures/no_internet.png # image when there isn't network connectivity
+    - pictures/contact_up.png # The logo of the application
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

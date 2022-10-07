@@ -117,6 +117,17 @@ class ContactsItems extends StatelessWidget {
       itemBuilder: (context, index) {
         // ignore: prefer_const_constructors
         return ListTile(
+          onTap: () {
+            // push to viewContact route with some parameters
+            Navigator.pushNamed(context, '/viewContact', arguments: {
+              'id': contacts[index].id,
+              'nom': contacts[index].nom,
+              'prenoms': contacts[index].prenoms,
+              'email': contacts[index].email,
+              'phone': contacts[index].phone,
+              'photo': "http://10.0.2.2:8000${contacts[index].photo}",
+            });
+          },
           leading: CachedNetworkImage(
             imageUrl: "http://10.0.2.2:8000${contacts[index].photo}",
             placeholder: (context, url) => CircularProgressIndicator(),
@@ -132,18 +143,7 @@ class ContactsItems extends StatelessWidget {
           ),
           subtitle: Text('📞 ${contacts[index].phone}'),
           trailing: IconButton(
-              icon: const Icon(Icons.remove_red_eye),
-              onPressed: () {
-                // push to a new route with some parameters
-                Navigator.pushNamed(context, '/viewContact', arguments: {
-                  'id': contacts[index].id,
-                  'nom': contacts[index].nom,
-                  'prenoms': contacts[index].prenoms,
-                  'email': contacts[index].email,
-                  'phone': contacts[index].phone,
-                  'photo': "http://10.0.2.2:8000${contacts[index].photo}",
-                });
-              }),
+              icon: const Icon(Icons.favorite_border), onPressed: () {}),
         );
         //return Image.network(contacts[index].photo);
       },
