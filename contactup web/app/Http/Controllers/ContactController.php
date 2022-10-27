@@ -18,7 +18,23 @@ class ContactController extends Controller
     public function index()
     {
         //
-        $contact = contact::all();
+        $contact = contact::where("is_arch", false)->get();
+
+        return json_encode($contact, JSON_UNESCAPED_SLASHES);
+    }
+
+    public function indexFav()
+    {
+        //
+        $contact = contact::where(["is_fav" => true, "is_arch" => false])->get();
+
+        return json_encode($contact, JSON_UNESCAPED_SLASHES);
+    }
+
+    public function indexArch()
+    {
+        //
+        $contact = contact::where("is_arch", true)->get();
 
         return json_encode($contact, JSON_UNESCAPED_SLASHES);
     }
@@ -72,6 +88,8 @@ class ContactController extends Controller
     public function show(contact $contact)
     {
         //
+
+        return json_encode($contact, JSON_UNESCAPED_SLASHES);
     }
 
     /**
@@ -92,6 +110,22 @@ class ContactController extends Controller
      * @param  \App\Models\contact  $contact
      * @return \Illuminate\Http\Response
      */
+
+    public function favorite(contact $contact, UpdatecontactRequest $request)
+    {
+        //
+        $contact->is_fav = $request->isFav == "true" ? false : true;
+        $contact->save();
+    }
+
+    public function archive(contact $contact, UpdatecontactRequest $request)
+    {
+        //
+        $contact->is_arch = $request->isArch == "true" ? false : true;
+        $contact->save();
+    }
+
+
     public function update(UpdatecontactRequest $request, contact $contact)
     {
         //
@@ -111,6 +145,11 @@ class ContactController extends Controller
         $contact->phone = $request->phone;
         if ($path != null) {
             $contact->photo = $path;
+        }
+
+        // Delete contact picture from mobile
+        if (isset($request->delImage)) {
+            $contact->photo = null;
         }
         $contact->save();
     }

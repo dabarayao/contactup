@@ -14,7 +14,8 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         //
         "http://10.0.2.2:8000/contact",
-        "http://10.0.2.2:8000/contact/edit/*"
+        "http://10.0.2.2:8000/contact/edit/*",
+        "http://10.0.2.2:8000/contact/edit/fav/*"
 
     ];
 }

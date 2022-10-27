@@ -14,7 +14,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [App\Http\Controllers\contactController::class, "index"])->name("home");
+Route::get('/contact/show/{contact}', [App\Http\Controllers\contactController::class, "show"]);
+Route::get('/favs', [App\Http\Controllers\contactController::class, "indexFav"])->name("homeFavs");
+Route::get('/archs', [App\Http\Controllers\contactController::class, "indexArch"])->name("homeArch");
+
+
 
 Route::post('/contact', [App\Http\Controllers\contactController::class, "store"]);
 Route::post('/contact/edit/{contact}', [App\Http\Controllers\contactController::class, "update"]);
+Route::post('/contact/edit/fav/{contact}', [App\Http\Controllers\contactController::class, "favorite"]);
+Route::post('/contact/edit/arch/{contact}', [App\Http\Controllers\contactController::class, "archive"]);
 Route::get('/delcontact/{contact}', [App\Http\Controllers\contactController::class, "destroyMob"]);

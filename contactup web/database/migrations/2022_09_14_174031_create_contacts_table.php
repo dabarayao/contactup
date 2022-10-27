@@ -19,6 +19,8 @@ class CreateContactsTable extends Migration
             $table->string("prenoms");
             $table->string("email");
             $table->string("phone");
+            $table->boolean("is_fav")->default(0);
+            $table->boolean("is_arch")->default(0);
             $table->string("photo")->nullable();
             $table->timestamps();
         });
