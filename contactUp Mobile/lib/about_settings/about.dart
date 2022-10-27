@@ -44,18 +44,6 @@ class _AboutPageState extends State<AboutPage> {
         appBar: AppBar(
           title: const Text("A propos"),
           backgroundColor: Color(0XFF1F1F30),
-          actions: [
-            Builder(builder: (context) {
-              return IconButton(
-                icon: Icon(Icons.add, size: 28),
-                color: Colors.white,
-                onPressed: () {
-                  // Respond to icon toggle
-                  Navigator.pushNamed(context, '/addContact');
-                },
-              );
-            })
-          ],
         ),
         drawer: Drawer(
           backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,

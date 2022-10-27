@@ -5,8 +5,8 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:basic_utils/basic_utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io' show Platform;
 
 import 'package:http/http.dart' as http;
 
@@ -14,6 +14,8 @@ String baseimage = ""; // image chosen converted in binary
 // var uploadimage;
 bool contactServer =
     false; // this variable check if the online server is reached
+
+bool _darkTheme = false;
 
 var uploadimage; // this variable catch the image send by the user
 
@@ -102,12 +104,31 @@ class _AddContactState extends State<AddContact> {
   initState() {
     super.initState();
     // we restore all this widget when the page is loaded
+    _loadTheme();
+    _loadLang();
 
     setState(() {
       uploadimage = null;
       contactServer = false;
       uploadCancelled = false;
       contactValid = AutovalidateMode.disabled;
+    });
+  }
+
+  var sysLng = Platform.localeName.split('_')[0];
+
+//Loading counter value on start
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _darkTheme = (prefs.getBool('darkTheme') ?? false);
+    });
+  }
+
+  Future<void> _loadLang() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      sysLng = (prefs.getString('lang') ?? Platform.localeName.split('_')[0]);
     });
   }
 
@@ -165,10 +186,11 @@ class _AddContactState extends State<AddContact> {
     */
 
     return Scaffold(
+      backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text("Ajouter un contact"),
+        title: Text(sysLng == "fr" ? 'Ajouter un contact' : 'Add a contact'),
         backgroundColor: Color(0XFF1F1F30),
       ),
       body: SingleChildScrollView(
@@ -176,6 +198,7 @@ class _AddContactState extends State<AddContact> {
           child: Form(
         // A form to save the contact's datas
         key: _formKey,
+        autovalidateMode: contactValid,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -225,27 +248,38 @@ class _AddContactState extends State<AddContact> {
               padding: const EdgeInsets.all(6.0),
               child: TextFormField(
                 controller: lastNamesController,
-                maxLines: 1, // want getLastNames() here but can't
-                decoration: const InputDecoration(
-                  labelText: 'Nom',
+                style: TextStyle(
+                    color: _darkTheme
+                        ? Colors.white
+                        : Color(
+                            0XFF142641)), // want getLastNames() here but can't
+                decoration: InputDecoration(
+                  labelText: sysLng == "fr" ? 'Nom' : 'Last Name',
                   labelStyle: TextStyle(
-                    color: Color(0XFF142641),
+                    color: _darkTheme ? Colors.white : Color(0XFF142641),
                   ),
-                  prefixIcon: Icon(Icons.person, color: Color(0XFF142641)),
+                  prefixIcon: Icon(Icons.person,
+                      color:
+                          _darkTheme ? Color(0xFFF2B538) : Color(0XFF142641)),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0XFF142641), width: 2.0),
+                    borderSide: BorderSide(
+                        color: _darkTheme ? Colors.white : Color(0XFF142641),
+                        width: 2.0),
                   ),
-                  errorBorder: UnderlineInputBorder(
+                  errorBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.red, width: 2.0),
                   ),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(width: 1),
+                    borderSide: BorderSide(
+                        width: 1,
+                        color: _darkTheme ? Colors.white : Color(0XFF142641)),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Entrez votre nom';
+                    return sysLng == "fr"
+                        ? 'Entrez votre nom'
+                        : 'Enter your Last Name';
                   }
                   return null;
                 },
@@ -259,26 +293,36 @@ class _AddContactState extends State<AddContact> {
               padding: const EdgeInsets.all(6.0),
               child: TextFormField(
                 controller: firstNamesController,
-                decoration: const InputDecoration(
-                  labelText: 'Prénoms',
+                style: TextStyle(
+                  color: _darkTheme ? Colors.white : Color(0XFF142641),
+                ),
+                decoration: InputDecoration(
+                  labelText: sysLng == "fr" ? 'Prénoms' : 'First Name',
                   labelStyle: TextStyle(
-                    color: Color(0XFF142641),
+                    color: _darkTheme ? Colors.white : Color(0XFF142641),
                   ),
-                  prefixIcon: Icon(Icons.person, color: Color(0XFF142641)),
+                  prefixIcon: Icon(Icons.person,
+                      color:
+                          _darkTheme ? Color(0xFFF2B538) : Color(0XFF142641)),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0XFF142641), width: 2.0),
+                    borderSide: BorderSide(
+                        color: _darkTheme ? Colors.white : Color(0XFF142641),
+                        width: 2.0),
                   ),
-                  errorBorder: OutlineInputBorder(
+                  errorBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.red, width: 2.0),
                   ),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(width: 1),
+                    borderSide: BorderSide(
+                        width: 1,
+                        color: _darkTheme ? Colors.white : Color(0XFF142641)),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Entrez votre prénoms';
+                    return sysLng == "fr"
+                        ? 'Entrez votre prénoms'
+                        : 'Enter your First Name';
                   }
                   return null;
                 },
@@ -292,26 +336,36 @@ class _AddContactState extends State<AddContact> {
               padding: const EdgeInsets.all(6.0),
               child: TextFormField(
                 controller: phoneNumberTemplateController,
-                decoration: const InputDecoration(
-                  labelText: 'Téléphone',
+                style: TextStyle(
+                  color: _darkTheme ? Colors.white : Color(0XFF142641),
+                ),
+                decoration: InputDecoration(
+                  labelText: sysLng == "fr" ? 'Téléphone' : 'Phone',
                   labelStyle: TextStyle(
-                    color: Color(0XFF142641),
+                    color: _darkTheme ? Colors.white : Color(0XFF142641),
                   ),
-                  prefixIcon: Icon(Icons.phone, color: Color(0XFF142641)),
+                  prefixIcon: Icon(Icons.phone,
+                      color:
+                          _darkTheme ? Color(0xFFF2B538) : Color(0XFF142641)),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0XFF142641), width: 2.0),
+                    borderSide: BorderSide(
+                        color: _darkTheme ? Colors.white : Color(0XFF142641),
+                        width: 2.0),
                   ),
-                  errorBorder: UnderlineInputBorder(
+                  errorBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.red, width: 2.0),
                   ),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(width: 1),
+                    borderSide: BorderSide(
+                        width: 1,
+                        color: _darkTheme ? Colors.white : Color(0XFF142641)),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Entrez votre numéro téléphone';
+                    return sysLng == "fr"
+                        ? 'Entrez votre numéro téléphone'
+                        : 'Enter your phone number';
                   }
                   return null;
                 },
@@ -325,26 +379,36 @@ class _AddContactState extends State<AddContact> {
               padding: const EdgeInsets.all(6.0),
               child: TextFormField(
                 controller: emailAddressTemplateController,
-                decoration: const InputDecoration(
+                style: TextStyle(
+                  color: _darkTheme ? Colors.white : Color(0XFF142641),
+                ),
+                decoration: InputDecoration(
                   labelText: 'Email',
                   labelStyle: TextStyle(
-                    color: Color(0XFF142641),
+                    color: _darkTheme ? Colors.white : Color(0XFF142641),
                   ),
-                  prefixIcon: Icon(Icons.mail, color: Color(0XFF142641)),
+                  prefixIcon: Icon(Icons.mail,
+                      color:
+                          _darkTheme ? Color(0xFFF2B538) : Color(0XFF142641)),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0XFF142641), width: 2.0),
+                    borderSide: BorderSide(
+                        color: _darkTheme ? Colors.white : Color(0XFF142641),
+                        width: 2.0),
                   ),
-                  errorBorder: UnderlineInputBorder(
+                  errorBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.red, width: 2.0),
                   ),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(width: 1),
+                    borderSide: BorderSide(
+                        width: 1,
+                        color: _darkTheme ? Colors.white : Color(0XFF142641)),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Entrez votre adresse email';
+                    return sysLng == "fr"
+                        ? 'Entrez votre adresse email'
+                        : 'Enter your email address';
                   }
                   return null;
                 },

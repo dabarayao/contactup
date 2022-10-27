@@ -245,7 +245,7 @@ class _ViewContactState extends State<ViewContact> {
                   child: Row(children: [
                     Icon(
                       Icons.edit,
-                      color: _darkTheme ? Color(0xFFF2B538) : null,
+                      color: _darkTheme ? Color(0xFFF2B538) : Color(0XFF1F1F30),
                     ),
                     Text(sysLng == "fr" ? ' Modifier' : ' Edit',
                         style: TextStyle(

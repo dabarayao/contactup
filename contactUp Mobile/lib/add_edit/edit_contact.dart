@@ -307,19 +307,24 @@ class _EditContactState extends State<EditContact> {
                       color:
                           _darkTheme ? Color(0xFFF2B538) : Color(0XFF142641)),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0XFF142641), width: 2.0),
+                    borderSide: BorderSide(
+                        color: _darkTheme ? Colors.white : Color(0XFF142641),
+                        width: 2.0),
                   ),
                   errorBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.red, width: 2.0),
                   ),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(width: 1),
+                    borderSide: BorderSide(
+                        width: 1,
+                        color: _darkTheme ? Colors.white : Color(0XFF142641)),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Entrez votre nom';
+                    return sysLng == "fr"
+                        ? 'Entrez votre nom'
+                        : 'Enter your Last Name';
                   }
                   return null;
                 },
@@ -344,19 +349,24 @@ class _EditContactState extends State<EditContact> {
                       color:
                           _darkTheme ? Color(0xFFF2B538) : Color(0XFF142641)),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0XFF142641), width: 2.0),
+                    borderSide: BorderSide(
+                        color: _darkTheme ? Colors.white : Color(0XFF142641),
+                        width: 2.0),
                   ),
-                  errorBorder: OutlineInputBorder(
+                  errorBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.red, width: 2.0),
                   ),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(width: 1),
+                    borderSide: BorderSide(
+                        width: 1,
+                        color: _darkTheme ? Colors.white : Color(0XFF142641)),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Entrez votre prénoms';
+                    return sysLng == "fr"
+                        ? 'Entrez votre prénoms'
+                        : 'Enter your First Name';
                   }
                   return null;
                 },
@@ -381,19 +391,24 @@ class _EditContactState extends State<EditContact> {
                       color:
                           _darkTheme ? Color(0xFFF2B538) : Color(0XFF142641)),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0XFF142641), width: 2.0),
+                    borderSide: BorderSide(
+                        color: _darkTheme ? Colors.white : Color(0XFF142641),
+                        width: 2.0),
                   ),
                   errorBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.red, width: 2.0),
                   ),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(width: 1),
+                    borderSide: BorderSide(
+                        width: 1,
+                        color: _darkTheme ? Colors.white : Color(0XFF142641)),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Entrez votre numéro téléphone';
+                    return sysLng == "fr"
+                        ? 'Entrez votre numéro téléphone'
+                        : 'Enter your phone number';
                   }
                   return null;
                 },
@@ -418,19 +433,24 @@ class _EditContactState extends State<EditContact> {
                       color:
                           _darkTheme ? Color(0xFFF2B538) : Color(0XFF142641)),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0XFF142641), width: 2.0),
+                    borderSide: BorderSide(
+                        color: _darkTheme ? Colors.white : Color(0XFF142641),
+                        width: 2.0),
                   ),
                   errorBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.red, width: 2.0),
                   ),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(width: 1),
+                    borderSide: BorderSide(
+                        width: 1,
+                        color: _darkTheme ? Colors.white : Color(0XFF142641)),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Entrez votre adresse email';
+                    return sysLng == "fr"
+                        ? 'Entrez votre adresse email'
+                        : 'Enter your email address';
                   }
                   return null;
                 },

@@ -8,9 +8,17 @@ import './splashPage.dart';
 import './contact_list/arch_contact.dart';
 import './about_settings/about.dart';
 import './about_settings/settings.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => GlobalSearch()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
