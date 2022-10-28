@@ -15,8 +15,13 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => GlobalSearch()),
+        ChangeNotifierProvider(create: (_) => LoadContact()),
+        ChangeNotifierProvider(create: (_) => GlobalSearchFav()),
+        ChangeNotifierProvider(create: (_) => LoadContactFav()),
+        ChangeNotifierProvider(create: (_) => GlobalSearchArch()),
+        ChangeNotifierProvider(create: (_) => LoadContactArch()),
       ],
-      child: const MyApp(),
+      child: MyApp(),
     ),
   );
 }

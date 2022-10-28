@@ -12,27 +12,37 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import "../utils/appBar.dart";
+
 import 'dart:io' show Platform;
 import 'package:http/http.dart' as http;
 
 bool _darkTheme = false;
 
-class GlobalSearch with ChangeNotifier, DiagnosticableTreeMixin {
+class GlobalSearch with ChangeNotifier {
   String _globalSearchValue = "";
 
   String get globalSearchValue => _globalSearchValue;
 
-  void change(vari) {
-    _globalSearchValue = vari;
+  void changeGlobalSearchValue(value) {
+    _globalSearchValue = value;
+
+    notifyListeners();
+  }
+}
+
+class LoadContact with ChangeNotifier {
+  Future<List<Contact>>? _allContacts;
+
+  Future<List<Contact>>? get allContacts => _allContacts;
+
+  void changeAllContacts(value) {
+    _allContacts = value;
     notifyListeners();
   }
 
   /// Makes `Counter` readable inside the devtools by listing all of its properties
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(StringProperty('globalSearchValue', globalSearchValue));
-  }
+
 }
 
 // Future to archive contacts or not
@@ -49,12 +59,10 @@ Future updateArch(archId, archive, context) async {
   // this http streamresponse variable make it possible to send all data to the server if everything is ok
   // ignore: unused_local_variable
   final http.StreamedResponse response = await request.send();
-
-  Navigator.of(context).pushNamed('/home');
 }
 
 // Future to make contacts favorite or not
-Future<void> updateFav(favId, favorite, context) async {
+Future<void> updateFav(favId, favorite) async {
   var postUri = Uri.parse(
       "http://10.0.2.2:8000/contact/edit/fav/$favId"); // this variable catches the url of the server where the contact will be saved
 
@@ -67,8 +75,6 @@ Future<void> updateFav(favId, favorite, context) async {
   // this http streamresponse variable make it possible to send all data to the server if everything is ok
   // ignore: unused_local_variable
   final http.StreamedResponse response = await request.send();
-
-  Navigator.of(context).pushNamed('/home');
 }
 
 // A future to get all the contacts
@@ -152,9 +158,6 @@ class Contact {
 }
 
 class ContactList extends HookWidget {
-  @protected
-  void initHook() {}
-
   var sysLng = Platform.localeName.split('_')[0];
 
 //Loading counter value on start
@@ -163,8 +166,12 @@ class ContactList extends HookWidget {
   Widget build(BuildContext context) {
     final future = useMemoized(SharedPreferences.getInstance);
     final snapshot = useFuture(future, initialData: null);
+    context
+        .read<LoadContact>()
+        .changeAllContacts(fetchContacts(http.Client(), context, sysLng));
+    var loadContact = context.watch<LoadContact>().allContacts;
 
-    context.read<GlobalSearch>().change("");
+    context.read<GlobalSearch>().changeGlobalSearchValue("");
 
     useEffect(() {
       final prefs = snapshot.data;
@@ -178,7 +185,8 @@ class ContactList extends HookWidget {
 
     return Scaffold(
       backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
-      appBar: DefaultAppBar(),
+      appBar: DefaultAppBar(
+          globalSearchValue: context.read<GlobalSearch>(), title: "Contact Up"),
       drawer: Drawer(
         backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
         // Add a ListView to the drawer. This ensures the user can scroll
@@ -256,7 +264,7 @@ class ContactList extends HookWidget {
       ),
       body: Center(
         child: FutureBuilder<List<Contact>>(
-          future: fetchContacts(http.Client(), context, sysLng),
+          future: loadContact,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Column(
@@ -268,7 +276,10 @@ class ContactList extends HookWidget {
                     style: ElevatedButton.styleFrom(
                         primary: Color(0xFFF2B538),
                         onPrimary: Color(0XFF142641)),
-                    onPressed: () {},
+                    onPressed: () {
+                      context.read<LoadContact>().changeAllContacts(
+                          fetchContacts(http.Client(), context, sysLng));
+                    },
                     child: Text(sysLng == "fr" ? "Actualiser" : "Refresh",
                         style: TextStyle(fontSize: 18)),
                   ),
@@ -276,7 +287,10 @@ class ContactList extends HookWidget {
               );
             } else if (snapshot.hasData) {
               return RefreshIndicator(
-                  onRefresh: () async {},
+                  onRefresh: () async {
+                    context.read<LoadContact>().changeAllContacts(
+                        fetchContacts(http.Client(), context, sysLng));
+                  },
                   child: ContactsItems(contacts: snapshot.data!, lang: sysLng));
             } else {
               return const Center(
@@ -299,6 +313,8 @@ class ContactsItems extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    var searchText = context.watch<GlobalSearch>().globalSearchValue;
+
     if (contacts.isNotEmpty) {
       if (context.watch<GlobalSearch>().globalSearchValue == "") {
         return ListView.builder(
@@ -326,8 +342,13 @@ class ContactsItems extends HookWidget {
                     SlidableAction(
                       // An action can be bigger than the others.
                       flex: 2,
-                      onPressed: (BuildContext context) => updateArch(
-                          contacts[index].id, contacts[index].isArch, context),
+                      onPressed: (BuildContext context) {
+                        updateArch(contacts[index].id, contacts[index].isArch,
+                            context);
+
+                        context.read<LoadContact>().changeAllContacts(
+                            fetchContacts(http.Client(), context, lang));
+                      },
                       backgroundColor: Color(0xFFF2B538),
                       foregroundColor: Colors.white,
                       icon: Icons.archive,
@@ -347,8 +368,13 @@ class ContactsItems extends HookWidget {
                     SlidableAction(
                       // An action can be bigger than the others.
                       flex: 2,
-                      onPressed: (BuildContext context) => updateArch(
-                          contacts[index].id, contacts[index].isArch, context),
+                      onPressed: (BuildContext context) {
+                        updateArch(contacts[index].id, contacts[index].isArch,
+                            context);
+
+                        context.read<LoadContact>().changeAllContacts(
+                            fetchContacts(http.Client(), context, lang));
+                      },
                       backgroundColor: Color(0xFFF2B538),
                       foregroundColor: Colors.white,
                       icon: Icons.archive,
@@ -411,8 +437,13 @@ class ContactsItems extends HookWidget {
                             throw ("big error 404"); // Request Timeout response status code
                           },
                         ).whenComplete(() {
-                          updateFav(contacts[index].id, contacts[index].isFav,
-                              context);
+                          updateFav(
+                            contacts[index].id,
+                            contacts[index].isFav,
+                          );
+
+                          context.read<LoadContact>().changeAllContacts(
+                              fetchContacts(http.Client(), context, lang));
                         });
                       }),
                 ));
@@ -424,18 +455,18 @@ class ContactsItems extends HookWidget {
           itemCount: contacts.length,
           itemBuilder: (context, index) {
             // ignore: prefer_const_constructors
-            return contacts[index].nom.toLowerCase().contains(context
-                        .watch<GlobalSearch>()
-                        .globalSearchValue
-                        .toLowerCase()) ||
-                    contacts[index].prenoms.toLowerCase().contains(context
-                        .watch<GlobalSearch>()
-                        .globalSearchValue
-                        .toLowerCase()) ||
-                    contacts[index].phone.toLowerCase().contains(context
-                        .watch<GlobalSearch>()
-                        .globalSearchValue
-                        .toLowerCase())
+            return contacts[index]
+                        .nom
+                        .toLowerCase()
+                        .contains(searchText.toLowerCase()) ||
+                    contacts[index]
+                        .prenoms
+                        .toLowerCase()
+                        .contains(searchText.toLowerCase()) ||
+                    contacts[index]
+                        .phone
+                        .toLowerCase()
+                        .contains(searchText.toLowerCase())
                 ? Slidable(
                     // Specify a key if the Slidable is dismissible.
                     key: ValueKey(0),
@@ -556,8 +587,10 @@ class ContactsItems extends HookWidget {
                                 throw ("big error 404"); // Request Timeout response status code
                               },
                             ).whenComplete(() {
-                              updateFav(contacts[index].id,
-                                  contacts[index].isFav, context);
+                              updateFav(
+                                  contacts[index].id, contacts[index].isFav);
+
+                              Navigator.of(context).pushNamed('/home');
                             });
                           }),
                     ))
@@ -588,94 +621,6 @@ class ContactsItems extends HookWidget {
           ),
         ],
       );
-    }
-  }
-}
-
-class DefaultAppBar extends HookWidget implements PreferredSizeWidget {
-  @override
-  Size get preferredSize => Size.fromHeight(56.0);
-  DefaultAppBar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    var barSearch = useState(false);
-    var closeVisible = useState(false);
-    var searchValue = useTextEditingController();
-
-    if (barSearch.value == false) {
-      return AppBar(
-        title: Text("Contact Up"),
-        backgroundColor: Color(0XFF1F1F30),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              barSearch.value = true;
-            },
-          ),
-          Builder(builder: (context) {
-            return IconButton(
-              icon: Icon(Icons.add, size: 28),
-              color: Colors.white,
-              onPressed: () {
-                // Respond to icon toggle
-                Navigator.pushNamed(context, '/addContact');
-              },
-            );
-          })
-        ],
-      );
-    } else {
-      return AppBar(
-          // The search area here
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              /* Clear the search field */
-              barSearch.value = false;
-            },
-          ),
-          title: Container(
-            width: double.infinity,
-            height: 40,
-            decoration: BoxDecoration(
-                color: Color(0XFF1F1F30),
-                borderRadius: BorderRadius.circular(5)),
-            child: Center(
-              child: TextField(
-                onChanged: (text) {
-                  context.read<GlobalSearch>().change(text);
-                  if (text == "") {
-                    closeVisible.value = false;
-                    context.read<GlobalSearch>().change("");
-                  } else {
-                    closeVisible.value = true;
-                  }
-                },
-                controller: searchValue,
-                style: TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                    hintText: ' Search...',
-                    hintStyle: TextStyle(color: Colors.grey),
-                    border: InputBorder.none),
-              ),
-            ),
-          ),
-          backgroundColor: Color(0XFF1F1F30),
-          actions: [
-            Visibility(
-              visible: closeVisible.value ? true : false,
-              child: IconButton(
-                icon: const Icon(Icons.clear, color: Colors.grey),
-                onPressed: () {
-                  /* Clear the search field */
-                  searchValue.text = "";
-                  closeVisible.value = false;
-                },
-              ),
-            )
-          ]);
     }
   }
 }
