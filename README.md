@@ -1,1 +1,1 @@
-# Contacup, web and mobile training app to save any contacts.
+# Contatcup, web and mobile training app to save any contacts.
