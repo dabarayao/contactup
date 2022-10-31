@@ -9,7 +9,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
+import 'dart:io' show Platform;
 import 'package:http/http.dart' as http;
 
 import "../utils/appBar.dart";
@@ -84,7 +84,7 @@ Future<List<FavContact>> fetchFavContacts(
         "Connection": "Keep-Alive",
         "Keep-Alive": "timeout=5, max=1000"
       }).timeout(
-    const Duration(seconds: 2),
+    const Duration(seconds: 3),
     onTimeout: () {
       // Time has run out, do what you wanted to do.
       showDialog<String>(
