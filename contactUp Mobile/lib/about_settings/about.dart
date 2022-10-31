@@ -1,48 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io' show Platform;
+import 'dart:io';
 
 bool _darkTheme = false;
 
-class AboutPage extends StatefulWidget {
-  const AboutPage({super.key});
-
-  @override
-  State<AboutPage> createState() => _AboutPageState();
-}
-
-class _AboutPageState extends State<AboutPage> {
-  @override
-  void initState() {
-    super.initState();
-    _loadTheme();
-    _loadLang();
-  }
+class AboutPage extends HookWidget {
+  AboutPage({super.key});
 
   var sysLng = Platform.localeName.split('_')[0];
 
-  //Loading counter value on start
-  Future<void> _loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _darkTheme = (prefs.getBool('darkTheme') ?? false);
-    });
-  }
-
-  Future<void> _loadLang() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      sysLng = (prefs.getString('lang') ?? Platform.localeName.split('_')[0]);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    final future = useMemoized(SharedPreferences.getInstance);
+    final snapshot = useFuture(future, initialData: null);
+
+    useEffect(() {
+      final prefs = snapshot.data;
+      if (prefs == null) {
+        return;
+      }
+      sysLng = (prefs.getString('lang') ?? Platform.localeName.split('_')[0]);
+      _darkTheme = (prefs.getBool('darkTheme') ?? false);
+      return null;
+    }, [snapshot.data]);
+
     return Scaffold(
         backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
         appBar: AppBar(
-          title: const Text("A propos"),
+          title: Text(sysLng == "fr" ? 'A propos' : 'About'),
           backgroundColor: Color(0XFF1F1F30),
         ),
         drawer: Drawer(
@@ -130,14 +117,20 @@ class _AboutPageState extends State<AboutPage> {
               SizedBox(width: 20),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text("""
+                child: Text(
+                    sysLng == "fr"
+                        ? """ 
                      Contact up est une application créé par le développeur Yao Dabara Mickael. Elle permet de sauvegarder ses contacts téléphonique sur un serveur distant.
-                """,
+                """
+                        : "Contact up is a software created by the developer Yao Dabara Mickael. It allows you to save your phone contacts on a remote server.",
                     style: TextStyle(
                       color: _darkTheme ? Colors.white : null,
                     )),
               ),
-              Text("Informations du développeur",
+              Text(
+                  sysLng == "fr"
+                      ? "Informations du développeur"
+                      : "Developer information",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: _darkTheme ? Colors.white : null,
@@ -147,11 +140,12 @@ class _AboutPageState extends State<AboutPage> {
                 onTap: () {
                   if (Platform.isAndroid) {
                     // add the [https]
-                    launch("https://wa.me/+2250779549937/"); // new line
+                    launchUrl(
+                        Uri.parse("https://wa.me/+2250779549937/")); // new line
                   } else {
                     // add the [https]
-                    launch(
-                        "https://api.whatsapp.com/send?phone=+2250779549937"); // new line
+                    launchUrl(Uri.parse(
+                        "https://api.whatsapp.com/send?phone=+2250779549937")); // new line
                   }
                 },
                 leading: const Icon(
@@ -167,7 +161,7 @@ class _AboutPageState extends State<AboutPage> {
                       color: Color(0xFFF2B538),
                     ),
                     onPressed: () {
-                      launch("mailto:dabarayao@gmail.com");
+                      launchUrl(Uri.parse("mailto:dabarayao@gmail.com"));
                     }),
               )
             ],

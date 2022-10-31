@@ -1,4 +1,7 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'dart:io';
 import 'dart:async';
@@ -6,13 +9,10 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io' show Platform;
 import 'package:http/http.dart' as http;
 
 String baseimage = ""; // image chosen converted in binary
 // var uploadimage;
-
-var redrawTimes = 0;
 
 bool _darkTheme = false;
 
@@ -24,199 +24,162 @@ AutovalidateMode contactValid =
     AutovalidateMode.disabled; // Variable of Autovalidation of the form
 
 // Main class for adding contact
-class EditContact extends StatefulWidget {
-  const EditContact({super.key});
-
-  @override
-  State<EditContact> createState() => _EditContactState();
-}
-
-// State of the main class for adding contact
-class _EditContactState extends State<EditContact> {
-  /* Future to create the contacts.
-   The future takes all the datas in the form and send them to a server in order to be saved
-*/
+class EditContact extends HookWidget {
+  EditContact({super.key});
 
   /* Future to update the contact.
    The future takes all the datas in the form and send them to a server in order to be modidiy the contact
 */
 
-  Future<void> updateContact(
-      nom, prenoms, email, phone, upimage, id, context) async {
-    var postUri = Uri.parse(
-        "http://10.0.2.2:8000/contact/edit/$id"); // this variable catches the url of the server where the contact will be saved
-
-    http.MultipartRequest request = http.MultipartRequest("POST",
-        postUri); // this http mulipartrequest variable creates a post instance to the server
-
-    // the datas which will be sent to the server
-    request.fields["nom"] = nom;
-    request.fields["prenoms"] = prenoms;
-    request.fields["email"] = email;
-    request.fields["phone"] = phone;
-
-    if (upimage != null) {
-      List<int> imageBytes = await upimage.readAsBytes();
-      baseimage = base64Encode(imageBytes);
-
-      http.MultipartFile multipartFile =
-          await http.MultipartFile.fromPath('image', upimage!.path);
-      request.files.add(multipartFile);
-    }
-
-    if (uploadimage == null) {
-      request.fields["delImage"] = "none";
-    }
-
-    // this http streamresponse variable make it possible to send all data to the server if everything is ok
-    // ignore: unused_local_variable
-    final http.StreamedResponse response = await request.send();
-
-    Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
-    Navigator.pushNamed(context, '/viewContact', arguments: {
-      'id': id,
-    });
-  }
-
-  // Future to take an image from the gallery
-  Future<void> chooseImage(context) async {
-    var choosedimage =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    //set source: ImageSource.camera to get image from camera
-
-    setState(() {
-      uploadimage = choosedimage;
-    });
-
-    Navigator.pop(context, 'OK');
-  }
-
-  // Future to create a capture an image with the camera
-  Future<void> captureImage(context) async {
-    var choosedimage =
-        await ImagePicker().pickImage(source: ImageSource.camera);
-    //set source: ImageSource.camera to get image from camera
-
-    setState(() {
-      uploadimage = choosedimage;
-    });
-
-    Navigator.pop(context, 'OK');
-  }
-
   final _formKey = GlobalKey<FormState>();
 
-  // TextEditing's variable to catch formfield's datas
-  TextEditingController lastNamesController = TextEditingController();
-  TextEditingController firstNamesController = TextEditingController();
-  TextEditingController phoneNumberTemplateController = TextEditingController();
-  TextEditingController emailAddressTemplateController =
-      TextEditingController();
-
-  @override
-  initState() {
-    super.initState();
-    // we restore all this widget when the page is loaded
-    _loadTheme();
-    _loadLang();
-
-    setState(() {
-      uploadimage = null;
-      redrawTimes = 0;
-      uploadCancelled = false;
-      contactValid = AutovalidateMode.disabled;
-    });
-  }
-
   var sysLng = Platform.localeName.split('_')[0];
-
-  //Loading counter value on start
-  Future<void> _loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _darkTheme = (prefs.getBool('darkTheme') ?? false);
-    });
-  }
-
-  Future<void> _loadLang() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      sysLng = (prefs.getString('lang') ?? Platform.localeName.split('_')[0]);
-    });
-  }
-
-  // Dialog box in order to pick an image
-  imageBrowse() {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
-        title: Text(sysLng == "fr" ? 'Choisissez une image' : 'Choose an image',
-            style: TextStyle(color: _darkTheme ? Colors.white : null)),
-        content: SizedBox(
-          height: 100,
-          child: Column(
-            children: [
-              TextButton.icon(
-                onPressed: () {
-                  // Respond to button press
-                  chooseImage(context);
-                },
-                icon: const Icon(Icons.image, size: 18),
-                label:
-                    Text(sysLng == "fr" ? 'Aller à gallery' : 'Go to gallery'),
-              ),
-              TextButton.icon(
-                onPressed: () {
-                  // Respond to button press
-                  captureImage(context);
-                },
-                icon: const Icon(Icons.camera_enhance, size: 18),
-                label: Text(
-                    sysLng == "fr" ? "Prendre une photo" : "Take a picture"),
-              )
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'Fermer'),
-            child: Text(sysLng == "fr" ? 'Fermer' : 'Close',
-                style: TextStyle(color: Color(0xFFff474c))),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     final routesArg = ModalRoute.of(context)!.settings.arguments
         as Map?; // variable to catch the route's arguments
+    final future = useMemoized(SharedPreferences.getInstance);
+    final snapshot = useFuture(future, initialData: null);
+    var editImage = useState(XFile(""));
+    var argPhoto = useState(routesArg!["photo"]);
+    var validMod = useState(AutovalidateMode.disabled);
 
-    redrawTimes++;
+    // TextEditing's variable to catch formfield's datas
+    var lastNamesController =
+        useState(TextEditingController(text: routesArg["nom"]));
+    var firstNamesController =
+        useState(TextEditingController(text: routesArg["prenoms"]));
+    var phoneNumberTemplateController =
+        useState(TextEditingController(text: routesArg["phone"]));
+    var emailAddressTemplateController =
+        useState(TextEditingController(text: routesArg["email"]));
 
-    // autofill the formField when there's arguments
-    if (routesArg != null && redrawTimes <= 1) {
-      lastNamesController = TextEditingController(text: routesArg["nom"]);
-      firstNamesController = TextEditingController(text: routesArg["prenoms"]);
-      phoneNumberTemplateController =
-          TextEditingController(text: routesArg["phone"]);
-      emailAddressTemplateController =
-          TextEditingController(text: routesArg["email"]);
-    }
+    useEffect(() {
+      final prefs = snapshot.data;
+      if (prefs == null) {
+        return;
+      }
+      sysLng = (prefs.getString('lang') ?? Platform.localeName.split('_')[0]);
+      _darkTheme = (prefs.getBool('darkTheme') ?? false);
+      return null;
+    }, [snapshot.data]);
 
     /* if routesArg is null and uploadimage.runtimeType is Xfile we give the link of existing photo on the server.
     This means the photo haven't been uploaded.
     */
-    if (routesArg != null &&
-        uploadimage.runtimeType != XFile &&
-        uploadCancelled != true) {
-      if (routesArg["photo"] == "http://10.0.2.2:8000aucun") {
-        uploadimage = null;
+    // if (routesArg != null &&
+    //     uploadimage.runtimeType != XFile &&
+    //     uploadCancelled != true) {
+    //   if (routesArg["photo"] == "http://10.0.2.2:8000aucun") {
+    //     uploadimage = null;
+    //   } else {
+    //     uploadimage = routesArg["photo"];
+    //   }
+    // }
+
+    Future<void> updateContact(
+        nom, prenoms, email, phone, upimage, id, context) async {
+      var postUri = Uri.parse(
+          "http://10.0.2.2:8000/contact/edit/$id"); // this variable catches the url of the server where the contact will be saved
+
+      http.MultipartRequest request = http.MultipartRequest("POST",
+          postUri); // this http mulipartrequest variable creates a post instance to the server
+
+      // the datas which will be sent to the server
+      request.fields["nom"] = nom;
+      request.fields["prenoms"] = prenoms;
+      request.fields["email"] = email;
+      request.fields["phone"] = phone;
+
+      if (upimage != null) {
+        List<int> imageBytes = await upimage.readAsBytes();
+        baseimage = base64Encode(imageBytes);
+
+        http.MultipartFile multipartFile =
+            await http.MultipartFile.fromPath('image', upimage!.path);
+        request.files.add(multipartFile);
       } else {
-        uploadimage = routesArg["photo"];
+        if (argPhoto.value == "") {
+          request.fields["delImage"] = "none";
+        }
       }
+
+      // this http streamresponse variable make it possible to send all data to the server if everything is ok
+      // ignore: unused_local_variable
+      final http.StreamedResponse response = await request.send();
+
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+      Navigator.pushNamed(context, '/viewContact', arguments: {
+        'id': id,
+      });
+    }
+
+    // Future to take an image from the gallery
+    Future<void> chooseImage(context) async {
+      var choosedimage =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
+      //set source: ImageSource.camera to get image from camera
+
+      editImage.value = choosedimage!;
+
+      Navigator.pop(context, 'OK');
+    }
+
+    // Future to create a capture an image with the camera
+    Future<void> captureImage(context) async {
+      var choosedimage =
+          await ImagePicker().pickImage(source: ImageSource.camera);
+      //set source: ImageSource.camera to get image from camera
+
+      editImage.value = choosedimage!;
+
+      Navigator.pop(context, 'OK');
+    }
+
+    // Dialog box in order to pick an image
+    imageBrowse() {
+      showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
+          title: Text(
+              sysLng == "fr" ? 'Choisissez une image' : 'Choose an image',
+              style: TextStyle(color: _darkTheme ? Colors.white : null)),
+          content: SizedBox(
+            height: 100,
+            child: Column(
+              children: [
+                TextButton.icon(
+                  onPressed: () {
+                    // Respond to button press
+                    chooseImage(context);
+                  },
+                  icon: const Icon(Icons.image, size: 18),
+                  label: Text(
+                      sysLng == "fr" ? 'Aller à gallery' : 'Go to gallery'),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    // Respond to button press
+                    captureImage(context);
+                  },
+                  icon: const Icon(Icons.camera_enhance, size: 18),
+                  label: Text(
+                      sysLng == "fr" ? "Prendre une photo" : "Take a picture"),
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'Fermer'),
+              child: Text(sysLng == "fr" ? 'Fermer' : 'Close',
+                  style: TextStyle(color: Color(0xFFff474c))),
+            ),
+          ],
+        ),
+      );
     }
 
     return Scaffold(
@@ -248,43 +211,36 @@ class _EditContactState extends State<EditContact> {
                     children: [
                       SizedBox(
                           height: 160,
-                          child: uploadimage != null
-                              ? uploadimage
-                                      is XFile // when the variable is string it isn't an upload file
-                                  ? Image.file(
-                                      File(uploadimage.path),
-                                    )
-                                  : CachedNetworkImage(
-                                      imageUrl: uploadimage,
-                                      placeholder: (context, url) =>
-                                          const CircularProgressIndicator(),
-                                      errorWidget: (context, url, error) =>
-                                          const Icon(Icons.person_outline,
-                                              size: 160,
-                                              color: Color(0XFF142641)),
-                                    )
-                              : const Icon(Icons.person_outline,
-                                  size: 160,
-                                  color:
-                                      Color(0XFF142641)) //load image from file
-                          ),
+                          child: editImage.value.path.isNotEmpty
+                              ? Image.file(
+                                  File(editImage.value.path),
+                                )
+                              : CachedNetworkImage(
+                                  imageUrl: argPhoto.value,
+                                  placeholder: (context, url) =>
+                                      const CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.person_outline,
+                                          size: 160,
+                                          color: Color(
+                                              0XFF142641)) //load image from file
+                                  )),
                     ],
                   ),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: IconButton(
                         onPressed: () {
-                          if (uploadimage == null) {
+                          if (editImage.value.path.isEmpty &&
+                              argPhoto.value == "") {
                             imageBrowse();
                           } else {
-                            setState(() {
-                              uploadimage = null;
-                              uploadCancelled = true;
-                            });
+                            editImage.value = XFile("");
+                            argPhoto.value = "";
                           }
                         },
                         icon: Icon(
-                            uploadimage == null
+                            editImage.value.path.isEmpty && argPhoto.value == ""
                                 ? Icons.camera_enhance
                                 : Icons.delete,
                             color: Color(0XFF142641))),
@@ -295,7 +251,7 @@ class _EditContactState extends State<EditContact> {
             Padding(
               padding: const EdgeInsets.all(6.0),
               child: TextFormField(
-                controller: lastNamesController,
+                controller: lastNamesController.value,
                 style: TextStyle(
                     color: _darkTheme ? Colors.white : Color(0XFF142641)),
                 decoration: InputDecoration(
@@ -337,7 +293,7 @@ class _EditContactState extends State<EditContact> {
             Padding(
               padding: const EdgeInsets.all(6.0),
               child: TextFormField(
-                controller: firstNamesController,
+                controller: firstNamesController.value,
                 style: TextStyle(
                     color: _darkTheme ? Colors.white : Color(0XFF142641)),
                 decoration: InputDecoration(
@@ -379,7 +335,7 @@ class _EditContactState extends State<EditContact> {
             Padding(
               padding: const EdgeInsets.all(6.0),
               child: TextFormField(
-                controller: phoneNumberTemplateController,
+                controller: phoneNumberTemplateController.value,
                 style: TextStyle(
                     color: _darkTheme ? Colors.white : Color(0XFF142641)),
                 decoration: InputDecoration(
@@ -421,7 +377,7 @@ class _EditContactState extends State<EditContact> {
             Padding(
               padding: const EdgeInsets.all(6.0),
               child: TextFormField(
-                controller: emailAddressTemplateController,
+                controller: emailAddressTemplateController.value,
                 style: TextStyle(
                     color: _darkTheme ? Colors.white : Color(0XFF142641)),
                 decoration: InputDecoration(
@@ -467,9 +423,7 @@ class _EditContactState extends State<EditContact> {
                 style: ElevatedButton.styleFrom(
                     primary: Color(0xFFF2B538), onPrimary: Color(0XFF142641)),
                 onPressed: () {
-                  setState(() {
-                    contactValid = AutovalidateMode.onUserInteraction;
-                  }); //
+                  validMod.value = AutovalidateMode.onUserInteraction;
 
                   if (_formKey.currentState!.validate()) {
                     // If the form is valid, the create data Future to save the datas.
@@ -482,9 +436,20 @@ class _EditContactState extends State<EditContact> {
                         showDialog<String>(
                           context: context,
                           builder: (BuildContext context) => AlertDialog(
-                            title: const Text('Internet error 🌍'),
-                            content:
-                                const Text('Vérifiez votre connexion internet'),
+                            backgroundColor:
+                                _darkTheme ? Color(0XFF1F1F30) : null,
+                            title: Text(
+                                sysLng == "fr"
+                                    ? 'Erreur de connexion'
+                                    : 'Internet error 🌍',
+                                style: TextStyle(
+                                    color: _darkTheme ? Colors.white : null)),
+                            content: Text(
+                                sysLng == "fr"
+                                    ? 'Vérifiez votre connexion internet'
+                                    : "Check your internet connexion",
+                                style: TextStyle(
+                                    color: _darkTheme ? Colors.white : null)),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () => Navigator.pop(context, 'OK'),
@@ -498,23 +463,23 @@ class _EditContactState extends State<EditContact> {
                     ).whenComplete(() {
                       // if routes args is null, it is we use the future createContact else we use the future updateContact
 
-                      if (uploadimage is String || uploadimage == null) {
+                      if (editImage.value.path.isEmpty) {
                         updateContact(
-                            lastNamesController.text,
-                            firstNamesController.text,
-                            emailAddressTemplateController.text,
-                            phoneNumberTemplateController.text,
+                            lastNamesController.value.text,
+                            firstNamesController.value.text,
+                            emailAddressTemplateController.value.text,
+                            phoneNumberTemplateController.value.text,
                             null,
-                            routesArg!["id"],
+                            routesArg["id"],
                             context);
                       } else {
                         updateContact(
-                            lastNamesController.text,
-                            firstNamesController.text,
-                            emailAddressTemplateController.text,
-                            phoneNumberTemplateController.text,
-                            uploadimage,
-                            routesArg!["id"],
+                            lastNamesController.value.text,
+                            firstNamesController.value.text,
+                            emailAddressTemplateController.value.text,
+                            phoneNumberTemplateController.value.text,
+                            editImage.value,
+                            routesArg["id"],
                             context);
                       }
                     });
