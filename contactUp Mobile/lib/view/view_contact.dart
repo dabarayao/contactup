@@ -2,6 +2,7 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // import 'dart:io';
@@ -33,8 +34,8 @@ Future<Contact> fetchContact(contactId, context, route) async {
     const Duration(seconds: 1),
     onTimeout: () {
       // Time has run out, do what you wanted to do.
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil('/$route', (route) => false);
+      Navigator.of(context).pushNamedAndRemoveUntil(
+          route != null ? '/$route' : 'home', (route) => false);
 
       throw ("big error 404"); // Request Timeout response status code
     },
@@ -92,30 +93,8 @@ class Contact {
 }
 
 // Main class for adding contact
-class ViewContact extends StatefulWidget {
-  const ViewContact({super.key});
-
-  @override
-  State<ViewContact> createState() => _ViewContactState();
-}
-
-// State of the main class for adding contact
-class _ViewContactState extends State<ViewContact> {
-  /* Future to create the contacts.
-   The future takes all the datas in the form and send them to a server in order to be saved
-*/
-  // future to delete the contact
-  Future<void> delContact(http.Client client, contactId) async {
-    final response = await client
-        .get(Uri.parse('http://10.0.2.2:8000/delcontact/$contactId'), headers: {
-      "Connection": "Keep-Alive",
-      "Keep-Alive": "timeout=5, max=1000"
-    });
-
-    Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
-
-    // Use the compute function to run parsePhotos in a separate isolate.
-  }
+class ViewContact extends HookWidget {
+  ViewContact({super.key});
 
 /*
   // Future to take an image from the gallery
@@ -139,47 +118,38 @@ class _ViewContactState extends State<ViewContact> {
   }
   */
 
-  @override
-  initState() {
-    super.initState();
-    // we restore all this widget when the page is loaded
-    _loadTheme();
-    _loadLang();
-  }
-
   var sysLng = Platform.localeName.split('_')[0];
-
-  //Loading counter value on start
-  Future<void> _loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _darkTheme = (prefs.getBool('darkTheme') ?? false);
-    });
-  }
-
-  Future<void> _loadLang() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      sysLng = (prefs.getString('lang') ?? Platform.localeName.split('_')[0]);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     var routesArg = ModalRoute.of(context)!.settings.arguments
         as Map; // variable to catch the route's arguments
+    final future = useMemoized(SharedPreferences.getInstance);
+    final snapshot = useFuture(future, initialData: null);
 
-    if (isFavorite == null) {
-      if (routesArg["isFav"] == true) {
-        setState(() {
-          isFavorite = true;
-        });
-      } else {
-        setState(() {
-          isFavorite = false;
-        });
-      }
+    // future to delete the contact
+    Future<void> delContact(http.Client client, contactId) async {
+      final response = await client.get(
+          Uri.parse('http://10.0.2.2:8000/delcontact/$contactId'),
+          headers: {
+            "Connection": "Keep-Alive",
+            "Keep-Alive": "timeout=5, max=1000"
+          });
+
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+
+      // Use the compute function to run parsePhotos in a separate isolate.
     }
+
+    useEffect(() {
+      final prefs = snapshot.data;
+      if (prefs == null) {
+        return;
+      }
+      sysLng = (prefs.getString('lang') ?? Platform.localeName.split('_')[0]);
+      _darkTheme = (prefs.getBool('darkTheme') ?? false);
+      return null;
+    }, [snapshot.data]);
 
     return Scaffold(
       backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
@@ -232,7 +202,7 @@ class _ViewContactState extends State<ViewContact> {
                     'prenoms': prenomsField,
                     'email': emailField,
                     'photo': photoField == null
-                        ? "http://10.0.2.2:8000aucun"
+                        ? ""
                         : "http://10.0.2.2:8000$photoField",
                     'phone': phoneField,
                   });

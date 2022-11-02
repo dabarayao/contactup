@@ -1,10 +1,24 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io' show Platform;
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 bool _darkTheme = false;
+
+Future<void> shareApp() async {
+  final bytes = await rootBundle.load('assets/apk/app-release.apk');
+  final list = bytes.buffer.asUint8List();
+
+  final tempDir = await getTemporaryDirectory();
+  final file = await File('${tempDir.path}/app-release.apk').create();
+  file.writeAsBytesSync(list);
+
+  Share.shareFiles([(file.path)]);
+}
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -233,7 +247,9 @@ class _SettingPageState extends State<SettingPage> {
                   },
                 )),
             ListTile(
-              onTap: () {},
+              onTap: () {
+                shareApp();
+              },
               textColor: _darkTheme ? Colors.white : null,
               leading: Icon(
                 Icons.share_outlined,

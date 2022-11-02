@@ -14,7 +14,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import "../utils/appBar.dart";
 
-import 'dart:io' show Platform;
+import 'dart:io';
 import 'package:http/http.dart' as http;
 
 bool _darkTheme = false;
@@ -84,7 +84,7 @@ Future<List<Contact>> fetchContacts(http.Client client, context, lang) async {
         "Connection": "Keep-Alive",
         "Keep-Alive": "timeout=5, max=1000"
       }).timeout(
-    const Duration(seconds: 3),
+    const Duration(seconds: 2),
     onTimeout: () {
       // Time has run out, do what you wanted to do.
       showDialog<String>(
