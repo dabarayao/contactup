@@ -1,7 +1,13 @@
 // ignore_for_file: file_names
-import 'package:easy_splash_screen/easy_splash_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+/*This page is the page of splashScreen */
+
+import 'package:easy_splash_screen/easy_splash_screen.dart'
+    show EasySplashScreen; // Importing the easy_splash_screen module
+import 'package:flutter/material.dart'
+    show BuildContext, Colors, Image, Key, State, StatefulWidget, Text, Widget;
+import 'package:shared_preferences/shared_preferences.dart' // Importing shared_preferences module
+    show
+        SharedPreferences;
 import 'dart:io' show Platform;
 
 class SplashPage extends StatefulWidget {
@@ -41,3 +47,10 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 }
+
+/*
+Developped by Yao Dabara Mickael
+phone: +2250779549937
+email: dabarayao@gmail.com
+telegram: @yiox2048
+ */

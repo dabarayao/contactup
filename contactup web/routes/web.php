@@ -25,3 +25,4 @@ Route::post('/contact/edit/{contact}', [App\Http\Controllers\contactController::
 Route::post('/contact/edit/fav/{contact}', [App\Http\Controllers\contactController::class, "favorite"]);
 Route::post('/contact/edit/arch/{contact}', [App\Http\Controllers\contactController::class, "archive"]);
 Route::get('/delcontact/{contact}', [App\Http\Controllers\contactController::class, "destroyMob"]);
+Route::get('/delmulcontact/{contact}', [App\Http\Controllers\contactController::class, "destroyMulMob"]);

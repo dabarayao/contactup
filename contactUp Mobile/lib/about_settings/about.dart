@@ -1,21 +1,64 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
+import 'package:flutter/material.dart'
+    show
+        AppBar,
+        AssetImage,
+        BoxDecoration,
+        BoxFit,
+        BuildContext,
+        Center,
+        Color,
+        Colors,
+        Column,
+        CrossAxisAlignment,
+        DecorationImage,
+        Drawer,
+        DrawerHeader,
+        EdgeInsets,
+        FontWeight,
+        Icon,
+        IconButton,
+        Icons,
+        Image,
+        ListTile,
+        ListView,
+        MainAxisAlignment,
+        Navigator,
+        Padding,
+        Scaffold,
+        SingleChildScrollView,
+        SizedBox,
+        Text,
+        TextStyle,
+        Widget;
+import 'package:flutter_hooks/flutter_hooks.dart'
+    show
+        HookWidget,
+        useEffect,
+        useFuture,
+        useMemoized; // Importing flutter_hooks module
+import 'package:url_launcher/url_launcher.dart'
+    show launchUrl; // Importing url_launcher module
+import 'package:shared_preferences/shared_preferences.dart'
+    show SharedPreferences; // Importing sharedPreferences module
+import 'dart:io' show Platform;
 
 bool _darkTheme = false;
 
 class AboutPage extends HookWidget {
   AboutPage({super.key});
 
-  var sysLng = Platform.localeName.split('_')[0];
+  var sysLng = Platform.localeName.split('_')[
+      0]; // The variable which contains the current language of the application
 
   @override
   Widget build(BuildContext context) {
-    final future = useMemoized(SharedPreferences.getInstance);
-    final snapshot = useFuture(future, initialData: null);
+    final future = useMemoized(SharedPreferences
+        .getInstance); // Hook variable which loads all the sharePreferences written on the disk
+    final snapshot = useFuture(future,
+        initialData:
+            null); // Hook variable which catches the datas of the sharePreferences
 
+    // Lifecycle to load the Theme and and the language of the application if they have been saved.
     useEffect(() {
       final prefs = snapshot.data;
       if (prefs == null) {
@@ -56,7 +99,7 @@ class AboutPage extends HookWidget {
                 onTap: () {
                   // Update the state of the app.
                   // ...
-                  Navigator.pushNamed(context, '/home');
+                  Navigator.pushNamed(context, '/');
                 },
               ),
               ListTile(
@@ -170,4 +213,9 @@ class AboutPage extends HookWidget {
   }
 }
 
-// Class to set a pattern for the contacts.
+/*
+Developped by Yao Dabara Mickael
+phone: +2250779549937
+email: dabarayao@gmail.com
+telegram: @yiox2048
+ */

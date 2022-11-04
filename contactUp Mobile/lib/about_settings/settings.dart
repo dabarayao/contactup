@@ -1,20 +1,54 @@
 // ignore_for_file: prefer_const_constructors, deprecated_member_use
 
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
+import 'package:flutter/material.dart'
+    show
+        AppBar,
+        AssetImage,
+        BoxDecoration,
+        BoxFit,
+        BuildContext,
+        Color,
+        Colors,
+        DecorationImage,
+        Drawer,
+        DrawerHeader,
+        EdgeInsets,
+        Icon,
+        Icons,
+        ListTile,
+        ListView,
+        Navigator,
+        RadioListTile,
+        Scaffold,
+        SimpleDialog,
+        State,
+        StateSetter,
+        StatefulBuilder,
+        StatefulWidget,
+        Switch,
+        Text,
+        TextStyle,
+        Widget,
+        showDialog;
+import 'package:flutter/services.dart' show Color, rootBundle;
+import 'package:shared_preferences/shared_preferences.dart' // Importing sharedPreferences module
+    show
+        SharedPreferences; // Importing sharedPreferences module
+import 'package:share_plus/share_plus.dart'
+    show Share; // Importing share_plus module
+import 'package:path_provider/path_provider.dart'
+    show getTemporaryDirectory; // Importing path_provider module
+import 'dart:io' show File, Platform;
 
-bool _darkTheme = false;
+bool _darkTheme = false; // The boolean for the dark theme of the application
 
+// Future to share the application
 Future<void> shareApp() async {
-  final bytes = await rootBundle.load('assets/apk/app-release.apk');
+  final bytes = await rootBundle.load('assets/apk/contactup.apk');
   final list = bytes.buffer.asUint8List();
 
   final tempDir = await getTemporaryDirectory();
-  final file = await File('${tempDir.path}/app-release.apk').create();
+  final file = await File('${tempDir.path}/contactup.apk').create();
   file.writeAsBytesSync(list);
 
   Share.shareFiles([(file.path)]);
@@ -35,10 +69,13 @@ class _SettingPageState extends State<SettingPage> {
     _loadLang();
   }
 
-  var sysLng = Platform.localeName.split('_')[0];
-  var setLang = Platform.localeName.split('_')[0] == "fr" ? "fr" : "en";
+  var sysLng = Platform.localeName.split('_')[
+      0]; // The variable which contains the current language of the application
+  var setLang = Platform.localeName.split('_')[0] == "fr"
+      ? "fr"
+      : "en"; // Variable for the radio tile
 
-  //Loading counter value on start
+  //Loading theme value on start
   Future<void> _loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -46,6 +83,7 @@ class _SettingPageState extends State<SettingPage> {
     });
   }
 
+  //Loading language value on start
   Future<void> _loadLang() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -104,7 +142,7 @@ class _SettingPageState extends State<SettingPage> {
                 onTap: () {
                   // Update the state of the app.
                   // ...
-                  Navigator.pushNamed(context, '/home');
+                  Navigator.pushNamed(context, '/');
                 },
               ),
               ListTile(
@@ -263,4 +301,9 @@ class _SettingPageState extends State<SettingPage> {
   }
 }
 
-// Class to set a pattern for the contacts.
+/*
+Developped by Yao Dabara Mickael
+phone: +2250779549937
+email: dabarayao@gmail.com
+telegram: @yiox2048
+ */

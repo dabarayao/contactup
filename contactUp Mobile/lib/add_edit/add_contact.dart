@@ -1,25 +1,91 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter/material.dart'
+    show
+        AlertDialog,
+        Align,
+        Alignment,
+        AppBar,
+        AutovalidateMode,
+        BorderSide,
+        BoxDecoration,
+        BuildContext,
+        Color,
+        Colors,
+        Column,
+        Container,
+        CrossAxisAlignment,
+        EdgeInsets,
+        ElevatedButton,
+        Form,
+        FormState,
+        GlobalKey,
+        Icon,
+        IconButton,
+        Icons,
+        Image,
+        InputDecoration,
+        MainAxisAlignment,
+        MediaQuery,
+        Navigator,
+        Padding,
+        Scaffold,
+        ScaffoldMessenger,
+        SingleChildScrollView,
+        SizedBox,
+        SnackBar,
+        SnackBarAction,
+        Text,
+        TextButton,
+        TextEditingController,
+        TextFormField,
+        TextStyle,
+        UnderlineInputBorder,
+        Widget,
+        showDialog;
+import 'package:flutter_hooks/flutter_hooks.dart'
+    show
+        HookWidget,
+        useEffect,
+        useFuture,
+        useMemoized,
+        useState; // Importing flutter_hooks module
 
-import 'dart:io';
+import 'dart:io' show File, Platform;
 import 'dart:async';
-import 'dart:convert';
-import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:http/http.dart' as http;
+import 'dart:convert' show base64Encode;
+import 'package:image_picker/image_picker.dart' // Importing imagePicker module
+    show
+        ImagePicker,
+        ImageSource,
+        XFile;
+import 'package:shared_preferences/shared_preferences.dart' // Importing sharedPreferences module
+    show
+        SharedPreferences;
+import 'dart:core';
+import 'package:email_validator/email_validator.dart'; // Importing email_validator module
+import 'package:http/http.dart' as http; // Importing http module
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 String baseimage = ""; // image chosen converted in binary
 // var uploadimage;
 
-bool _darkTheme = false;
-// var _uploadimage; // this variable catch the image send by the user
+bool _darkTheme = false; // The boolean for the dark theme of the application
+
+// Future to check internet connectivity (to check if mobile data or wifi are enable)
+Future<bool> checkInternetConnection() async {
+  var connectivityResult = await (Connectivity().checkConnectivity());
+  if (connectivityResult == ConnectivityResult.mobile) {
+    return true;
+  } else if (connectivityResult == ConnectivityResult.wifi) {
+    return true;
+  }
+  return false;
+}
 
 // Main class for adding contact
 class AddContact extends HookWidget {
   AddContact({super.key});
 
+  // Future to create a new contact
   Future<void> createContact(
       nom, prenoms, email, phone, upimage, context) async {
     var postUri = Uri.parse(
@@ -47,16 +113,18 @@ class AddContact extends HookWidget {
     // ignore: unused_local_variable
     final http.StreamedResponse response = await request.send();
 
-    Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
   }
 
   /* Future to update the contact.
    The future takes all the datas in the form and send them to a server in order to be modidiy the contact
 */
 
-  final _formKey = GlobalKey<FormState>();
+  final _formKey =
+      GlobalKey<FormState>(); // The form key for the Form's contact
 
-  var sysLng = Platform.localeName.split('_')[0];
+  var sysLng = Platform.localeName.split('_')[
+      0]; // The variable which contains the current language of the application
 
   // Dialog box in order to pick an image
 
@@ -69,11 +137,17 @@ class AddContact extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final future = useMemoized(SharedPreferences.getInstance);
-    final snapshot = useFuture(future, initialData: null);
-    var addImage = useState(XFile(""));
-    var validMod = useState(AutovalidateMode.disabled);
+    final future = useMemoized(SharedPreferences
+        .getInstance); // Hook variable which loads all the sharePreferences written on the disk
+    final snapshot = useFuture(future,
+        initialData:
+            null); // Hook variable which catches the datas of the sharePreferences
+    var addImage =
+        useState(XFile("")); // Hook variable to catch the upload image data
+    var validMod = useState(AutovalidateMode
+        .disabled); // Hook variable to set the state of the Form validation
 
+    // Lifecycle to load the Theme and and the language of the application if they have been saved.
     useEffect(() {
       final prefs = snapshot.data;
       if (prefs == null) {
@@ -106,6 +180,7 @@ class AddContact extends HookWidget {
       Navigator.pop(context, 'OK');
     }
 
+    // Dialog box in order to pick an image
     imageBrowse() {
       showDialog<String>(
         context: context,
@@ -366,6 +441,12 @@ class AddContact extends HookWidget {
                     return sysLng == "fr"
                         ? 'Entrez votre adresse email'
                         : 'Enter your email address';
+                  } else {
+                    if (!EmailValidator.validate(value)) {
+                      return sysLng == "fr"
+                          ? """Entrez une addresse email valide;\n l\'adresse email doit contenir un "@" et un "." """
+                          : """ Enter a valid email address;\n the email address must have an "@" and a "' """;
+                    }
                   }
                   return null;
                 },
@@ -388,10 +469,36 @@ class AddContact extends HookWidget {
                     // If the form is valid, the create data Future to save the datas.
 
                     // If there is network, the datas are saved or else an alert error is shown
-                    http.get(Uri.parse('http://10.0.2.2:8000/')).timeout(
-                      const Duration(seconds: 1),
-                      onTimeout: () {
-                        // Time has run out, do what you wanted to do.
+                    http
+                        .get(Uri.parse('http://10.0.2.2:8000/'))
+                        .timeout(const Duration(seconds: 1))
+                        .catchError((e) {
+                      var snackBar = SnackBar(
+                        content: Text(sysLng == "fr"
+                            ? 'Vérifiez votre connexion internet'
+                            : "Check your internet connexion"),
+                        action: SnackBarAction(
+                          label: 'Ok',
+                          onPressed: () {
+                            // Some code to undo the change.
+                          },
+                        ),
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar); //
+                    }).whenComplete(() {
+                      createContact(
+                          lastNamesController.text,
+                          firstNamesController.text,
+                          emailAddressTemplateController.text,
+                          phoneNumberTemplateController.text,
+                          addImage.value,
+                          context);
+                    });
+
+                    // Test connectivity async Future
+                    checkInternetConnection().then((internet) {
+                      if (internet == null || internet == false) {
                         showDialog<String>(
                           context: context,
                           builder: (BuildContext context) => AlertDialog(
@@ -417,16 +524,7 @@ class AddContact extends HookWidget {
                             ],
                           ),
                         );
-                        throw ("big error 404"); // Request Timeout response status code
-                      },
-                    ).whenComplete(() {
-                      createContact(
-                          lastNamesController.text,
-                          firstNamesController.text,
-                          emailAddressTemplateController.text,
-                          phoneNumberTemplateController.text,
-                          addImage.value,
-                          context);
+                      }
                     });
                   }
                 },
@@ -440,3 +538,10 @@ class AddContact extends HookWidget {
     );
   }
 }
+
+/*
+Developped by Yao Dabara Mickael
+phone: +2250779549937
+email: dabarayao@gmail.com
+telegram: @yiox2048
+ */

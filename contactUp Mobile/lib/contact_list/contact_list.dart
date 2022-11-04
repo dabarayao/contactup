@@ -2,23 +2,90 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
-import 'package:basic_utils/basic_utils.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter/material.dart'
+    show
+        AlertDialog,
+        AssetImage,
+        BoxDecoration,
+        BoxFit,
+        BuildContext,
+        Center,
+        ChangeNotifier,
+        CircularProgressIndicator,
+        Color,
+        Colors,
+        Column,
+        CrossAxisAlignment,
+        DecorationImage,
+        Drawer,
+        DrawerHeader,
+        EdgeInsets,
+        ElevatedButton,
+        FutureBuilder,
+        Icon,
+        IconButton,
+        Icons,
+        Image,
+        ListTile,
+        ListView,
+        MainAxisAlignment,
+        Navigator,
+        RefreshIndicator,
+        Scaffold,
+        ScaffoldMessenger,
+        SnackBar,
+        SnackBarAction,
+        Text,
+        TextButton,
+        TextOverflow,
+        TextStyle,
+        ValueKey,
+        Widget,
+        showDialog;
+import 'dart:convert' show jsonDecode;
+import 'package:cached_network_image/cached_network_image.dart'
+    show CachedNetworkImage; // Importing cachedNetworkImage module
+import 'package:flutter/foundation.dart' show ChangeNotifier, ValueKey, compute;
+import 'package:basic_utils/basic_utils.dart'
+    show StringUtils; // Importing basic_utils module
+import 'package:flutter_slidable/flutter_slidable.dart'
+    show ActionPane, DismissiblePane, ScrollMotion, Slidable, SlidableAction;
+import 'package:provider/provider.dart'; // Importing provider module
+import 'package:shared_preferences/shared_preferences.dart'
+    show SharedPreferences; // Importing sharedPreferences module
+import 'package:flutter_hooks/flutter_hooks.dart'
+    show
+        HookWidget,
+        useEffect,
+        useFuture,
+        useMemoized,
+        useState; // Importing flutter_hooks module
 
 import "../utils/appBar.dart";
 
-import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'dart:io' show Platform;
+import 'package:http/http.dart' as http
+    show
+        MultipartRequest,
+        StreamedResponse,
+        get,
+        Client; // Importing http module
+import 'package:connectivity_plus/connectivity_plus.dart';
 
-bool _darkTheme = false;
+bool _darkTheme = false; // The boolean for the dark theme of the application
 
+// Future to check internet connectivity (to check if mobile data or wifi are enable)
+Future<bool> checkInternetConnection() async {
+  var connectivityResult = await (Connectivity().checkConnectivity());
+  if (connectivityResult == ConnectivityResult.mobile) {
+    return true;
+  } else if (connectivityResult == ConnectivityResult.wifi) {
+    return true;
+  }
+  return false;
+}
+
+// Provider for the search into the appBar
 class GlobalSearch with ChangeNotifier {
   String _globalSearchValue = "";
 
@@ -31,6 +98,7 @@ class GlobalSearch with ChangeNotifier {
   }
 }
 
+// Provider for the contacts in order to load or reload them
 class LoadContact with ChangeNotifier {
   Future<List<Contact>>? _allContacts;
 
@@ -40,12 +108,34 @@ class LoadContact with ChangeNotifier {
     _allContacts = value;
     notifyListeners();
   }
-
-  /// Makes `Counter` readable inside the devtools by listing all of its properties
-
 }
 
-// Future to archive contacts or not
+// Provider for the contacts in order to load or reload them
+class SelectedContacts with ChangeNotifier {
+  List _selectedContacts = [];
+
+  List get selectedContacts => _selectedContacts;
+
+  void newSelectedContacts(value) {
+    _selectedContacts.add(value);
+
+    notifyListeners();
+  }
+
+  void removeSelectedContacts(value) {
+    _selectedContacts.removeWhere((item) => item == value);
+
+    notifyListeners();
+  }
+
+  void emptySelectedContacts() {
+    _selectedContacts.clear();
+
+    notifyListeners();
+  }
+}
+
+// Future to archive or unarchive contacts
 Future updateArch(archId, archive, context) async {
   var postUri = Uri.parse(
       "http://10.0.2.2:8000/contact/edit/arch/$archId"); // this variable catches the url of the server where the contact will be saved
@@ -79,37 +169,9 @@ Future<void> updateFav(favId, favorite) async {
 
 // A future to get all the contacts
 Future<List<Contact>> fetchContacts(http.Client client, context, lang) async {
-  final response = await client.get(Uri.parse('http://10.0.2.2:8000/'),
-      headers: {
-        "Connection": "Keep-Alive",
-        "Keep-Alive": "timeout=5, max=1000"
-      }).timeout(
-    const Duration(seconds: 2),
-    onTimeout: () {
-      // Time has run out, do what you wanted to do.
-      showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
-          title: Text(
-              lang == "fr" ? 'Erreur de connexion' : 'Internet error 🌍',
-              style: TextStyle(color: _darkTheme ? Colors.white : null)),
-          content: Text(
-              lang == "fr"
-                  ? 'Vérifiez votre connexion internet'
-                  : "Check your internet connexion",
-              style: TextStyle(color: _darkTheme ? Colors.white : null)),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'OK'),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
+  final response = await client.get(Uri.parse('http://10.0.2.2:8000/')).timeout(
+        const Duration(seconds: 2),
       );
-      throw ("big error 404"); // Request Timeout response status code
-    },
-  );
 
   // Use the compute function to run parsePhotos in a separate isolate.
   return compute(parseContacts, response.body);
@@ -122,6 +184,7 @@ List<Contact> parseContacts(String responseBody) {
   return parsed.map<Contact>((json) => Contact.fromJson(json)).toList();
 }
 
+/*The Contact class which formats the Datas */
 class Contact {
   final int id;
   final String nom;
@@ -158,21 +221,26 @@ class Contact {
 }
 
 class ContactList extends HookWidget {
-  var sysLng = Platform.localeName.split('_')[0];
-
-//Loading counter value on start
+  var sysLng = Platform.localeName.split('_')[
+      0]; // The variable which contains the current language of the application
 
   @override
   Widget build(BuildContext context) {
-    final future = useMemoized(SharedPreferences.getInstance);
-    final snapshot = useFuture(future, initialData: null);
-    context
-        .read<LoadContact>()
-        .changeAllContacts(fetchContacts(http.Client(), context, sysLng));
+    final future = useMemoized(SharedPreferences
+        .getInstance); // Hook variable which loads all the sharePreferences written on the disk
+    final snapshot = useFuture(future,
+        initialData:
+            null); // Hook variable which catches the datas of the sharePreferences
+    context.read<LoadContact>().changeAllContacts(fetchContacts(
+        http.Client(),
+        context,
+        sysLng)); // Loading all the contacts by calling a method of his provider
     var loadContact = context.watch<LoadContact>().allContacts;
 
-    context.read<GlobalSearch>().changeGlobalSearchValue("");
+    context.read<GlobalSearch>().changeGlobalSearchValue(
+        ""); // Erase the globalSearch previous value from the Search input
 
+    // Lifecycle to load the Theme and and the language of the application if they have been saved.
     useEffect(() {
       final prefs = snapshot.data;
       if (prefs == null) {
@@ -186,7 +254,9 @@ class ContactList extends HookWidget {
     return Scaffold(
       backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
       appBar: DefaultAppBar(
-          globalSearchValue: context.read<GlobalSearch>(), title: "Contact Up"),
+          globalSearchValue: context.read<GlobalSearch>(),
+          title: "Contact Up",
+          selCont: context.watch<SelectedContacts>()),
       drawer: Drawer(
         backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
         // Add a ListView to the drawer. This ensures the user can scroll
@@ -277,8 +347,45 @@ class ContactList extends HookWidget {
                         primary: Color(0xFFF2B538),
                         onPrimary: Color(0XFF142641)),
                     onPressed: () {
+                      // check if there's network to reload the data
+                      http
+                          .get(Uri.parse("http://10.0.2.2:8000"))
+                          .timeout(const Duration(seconds: 1))
+                          .catchError((e) {
+                        var snackBar = SnackBar(
+                          content: Text(sysLng == "fr"
+                              ? 'Vérifiez votre connexion internet'
+                              : "Check your internet connexion"),
+                          action: SnackBarAction(
+                            label: 'Ok',
+                            onPressed: () {
+                              // Some code to undo the change.
+                            },
+                          ),
+                        );
+
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(snackBar); // Finally, callback fires.
+                      });
+
+                      // try reloading data with internet connection
                       context.read<LoadContact>().changeAllContacts(
                           fetchContacts(http.Client(), context, sysLng));
+
+                      // Test connectivity async Future
+                      checkInternetConnection().then((internet) {
+                        if (internet == false) {
+                          var snackBar = SnackBar(
+                            content: Text(sysLng == "fr"
+                                ? 'Vérifiez votre connexion internet'
+                                : "Check your internet connexion"),
+                          );
+
+// Find the ScaffoldMessenger in the widget tree
+// and use it to show a SnackBar.
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        }
+                      });
                     },
                     child: Text(sysLng == "fr" ? "Actualiser" : "Refresh",
                         style: TextStyle(fontSize: 18)),
@@ -313,14 +420,21 @@ class ContactsItems extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    var searchText = context.watch<GlobalSearch>().globalSearchValue;
+    var searchText = context
+        .watch<GlobalSearch>()
+        .globalSearchValue; // Hooks variable which contains the search text from the serach input
 
+    var selectedContacts = context.watch<SelectedContacts>().selectedContacts;
+
+    // Checking if the favorites list is not empty or not
     if (contacts.isNotEmpty) {
+      // Checking if the search text is empty or not
       if (context.watch<GlobalSearch>().globalSearchValue == "") {
         return ListView.builder(
           itemCount: contacts.length,
           itemBuilder: (context, index) {
             // ignore: prefer_const_constructors
+            // Filtering the serachValue with the favorite's contact list
             return Slidable(
                 // Specify a key if the Slidable is dismissible.
                 key: ValueKey(0),
@@ -388,10 +502,38 @@ class ContactsItems extends HookWidget {
                 child: ListTile(
                   onTap: () {
                     // push to viewContact route with some parameters
-                    Navigator.pushNamed(context, '/viewContact',
-                        arguments: {'id': contacts[index].id, 'route': "home"});
+                    if (selectedContacts.isNotEmpty) {
+                      if (selectedContacts.contains(contacts[index].id)) {
+                        context
+                            .read<SelectedContacts>()
+                            .removeSelectedContacts(contacts[index].id);
+                      } else {
+                        context
+                            .read<SelectedContacts>()
+                            .newSelectedContacts(contacts[index].id);
+                      }
+                    } else {
+                      Navigator.pushNamed(context, '/viewContact', arguments: {
+                        'id': contacts[index].id,
+                        'route': "home"
+                      });
+                    }
+                  },
+                  onLongPress: () {
+                    if (!selectedContacts.contains(contacts[index].id)) {
+                      context
+                          .read<SelectedContacts>()
+                          .newSelectedContacts(contacts[index].id);
+                    }
+
+                    print(selectedContacts);
                   },
                   textColor: _darkTheme ? Colors.white : null,
+                  selected: selectedContacts.contains(contacts[index].id)
+                      ? true
+                      : false,
+                  selectedColor: _darkTheme ? Colors.white : Colors.black,
+                  selectedTileColor: const Color(0xFFF2B538).withOpacity(0.3),
                   leading: CachedNetworkImage(
                     imageUrl: "http://10.0.2.2:8000${contacts[index].photo}",
                     placeholder: (context, url) => CircularProgressIndicator(),
@@ -414,29 +556,25 @@ class ContactsItems extends HookWidget {
                             : Color(0XFF1F1F30),
                       ),
                       onPressed: () {
-                        // If there is network, the datas are saved or else an alert error is shown
-                        http.get(Uri.parse('http://10.0.2.2:8000/')).timeout(
-                          const Duration(seconds: 1),
-                          onTimeout: () {
-                            // Time has run out, do what you wanted to do.
-                            showDialog<String>(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                title: const Text('Internet error 🌍'),
-                                content: const Text(
-                                    'Vérifiez votre connexion internet'),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, 'OK'),
-                                    child: const Text('OK'),
-                                  ),
-                                ],
-                              ),
-                            );
-                            throw ("big error 404"); // Request Timeout response status code
-                          },
-                        ).whenComplete(() {
+                        // If there is network, the contact become favorite or else a snackbar error is shown
+                        http
+                            .get(Uri.parse('http://10.0.2.2:8000/'))
+                            .timeout(const Duration(seconds: 1))
+                            .catchError((e) {
+                          var snackBar = SnackBar(
+                            content: Text(lang == "fr"
+                                ? 'Vérifiez votre connexion internet'
+                                : "Check your internet connexion"),
+                            action: SnackBarAction(
+                              label: 'Ok',
+                              onPressed: () {
+                                // Some code to undo the change.
+                              },
+                            ),
+                          );
+
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        }).whenComplete(() {
                           updateFav(
                             contacts[index].id,
                             contacts[index].isFav,
@@ -564,33 +702,27 @@ class ContactsItems extends HookWidget {
                             // If there is network, the datas are saved or else an alert error is shown
                             http
                                 .get(Uri.parse('http://10.0.2.2:8000/'))
-                                .timeout(
-                              const Duration(seconds: 1),
-                              onTimeout: () {
-                                // Time has run out, do what you wanted to do.
-                                showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      AlertDialog(
-                                    title: const Text('Internet error 🌍'),
-                                    content: const Text(
-                                        'Vérifiez votre connexion internet'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context, 'OK'),
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                                throw ("big error 404"); // Request Timeout response status code
-                              },
-                            ).whenComplete(() {
+                                .timeout(const Duration(seconds: 1))
+                                .catchError((e) {
+                              var snackBar = SnackBar(
+                                content: Text(lang == "fr"
+                                    ? 'Vérifiez votre connexion internet'
+                                    : "Check your internet connexion"),
+                                action: SnackBarAction(
+                                  label: 'Ok',
+                                  onPressed: () {
+                                    // Some code to undo the change.
+                                  },
+                                ),
+                              );
+
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(snackBar);
+                            }).whenComplete(() {
                               updateFav(
                                   contacts[index].id, contacts[index].isFav);
 
-                              Navigator.of(context).pushNamed('/home');
+                              Navigator.of(context).pushNamed('/');
                             });
                           }),
                     ))
@@ -624,3 +756,10 @@ class ContactsItems extends HookWidget {
     }
   }
 }
+
+/*
+Developped by Yao Dabara Mickael
+phone: +2250779549937
+email: dabarayao@gmail.com
+telegram: @yiox2048
+ */

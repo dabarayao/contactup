@@ -1,27 +1,75 @@
 // ignore_for_file: must_be_immutable
 
-import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter/material.dart'
+    show
+        AlertDialog,
+        Align,
+        Alignment,
+        AppBar,
+        AutovalidateMode,
+        BorderSide,
+        BoxDecoration,
+        BuildContext,
+        CircularProgressIndicator,
+        Color,
+        Colors,
+        Column,
+        Container,
+        CrossAxisAlignment,
+        EdgeInsets,
+        ElevatedButton,
+        Form,
+        FormState,
+        GlobalKey,
+        Icon,
+        IconButton,
+        Icons,
+        Image,
+        InputDecoration,
+        MainAxisAlignment,
+        MediaQuery,
+        ModalRoute,
+        Navigator,
+        Padding,
+        Scaffold,
+        SingleChildScrollView,
+        SizedBox,
+        Text,
+        TextButton,
+        TextEditingController,
+        TextFormField,
+        TextStyle,
+        UnderlineInputBorder,
+        Widget,
+        showDialog;
+import 'package:flutter_hooks/flutter_hooks.dart'
+    show
+        HookWidget,
+        useEffect,
+        useFuture,
+        useMemoized,
+        useState; // Importing flutter_hooks module
 
-import 'dart:io';
+import 'dart:io' show Platform, File;
 import 'dart:async';
-import 'dart:convert';
-import 'package:image_picker/image_picker.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
+import 'dart:convert' show base64Encode;
+import 'package:image_picker/image_picker.dart'
+    show ImagePicker, ImageSource, XFile; // Importing ImagePicker module
+import 'package:cached_network_image/cached_network_image.dart'
+    show CachedNetworkImage; // Importing cachedNetworkImage module
+import 'package:shared_preferences/shared_preferences.dart'
+    show SharedPreferences; // Importing sharedPreferences module
+import 'package:email_validator/email_validator.dart'; // Importing email_validator module
+import 'package:http/http.dart' as http
+    show
+        MultipartFile,
+        MultipartRequest,
+        StreamedResponse,
+        get; // Importing http module
 
 String baseimage = ""; // image chosen converted in binary
-// var uploadimage;
 
-bool _darkTheme = false;
-
-var uploadimage; // this variable catch the image send by the user
-
-bool uploadCancelled = false;
-
-AutovalidateMode contactValid =
-    AutovalidateMode.disabled; // Variable of Autovalidation of the form
+bool _darkTheme = false; // The boolean for the dark theme of the application
 
 // Main class for adding contact
 class EditContact extends HookWidget {
@@ -31,19 +79,27 @@ class EditContact extends HookWidget {
    The future takes all the datas in the form and send them to a server in order to be modidiy the contact
 */
 
-  final _formKey = GlobalKey<FormState>();
+  final _formKey =
+      GlobalKey<FormState>(); // The form key for the Form's contact
 
-  var sysLng = Platform.localeName.split('_')[0];
+  var sysLng = Platform.localeName.split('_')[
+      0]; // The variable which contains the current language of the application
 
   @override
   Widget build(BuildContext context) {
     final routesArg = ModalRoute.of(context)!.settings.arguments
         as Map?; // variable to catch the route's arguments
-    final future = useMemoized(SharedPreferences.getInstance);
-    final snapshot = useFuture(future, initialData: null);
-    var editImage = useState(XFile(""));
-    var argPhoto = useState(routesArg!["photo"]);
-    var validMod = useState(AutovalidateMode.disabled);
+    final future = useMemoized(SharedPreferences
+        .getInstance); // Hook variable which loads all the sharePreferences written on the disk
+    final snapshot = useFuture(future,
+        initialData:
+            null); // Hook variable which catches the datas of the sharePreferences
+    var editImage =
+        useState(XFile("")); // Hook variable to catch the upload image data
+    var argPhoto = useState(routesArg![
+        "photo"]); // Hook variable to catch the link of the existing photo if not null
+    var validMod = useState(AutovalidateMode
+        .disabled); // Hook variable to set the state of the Form validation
 
     // TextEditing's variable to catch formfield's datas
     var lastNamesController =
@@ -55,6 +111,7 @@ class EditContact extends HookWidget {
     var emailAddressTemplateController =
         useState(TextEditingController(text: routesArg["email"]));
 
+    // Lifecycle to load the Theme and and the language of the application if they have been saved.
     useEffect(() {
       final prefs = snapshot.data;
       if (prefs == null) {
@@ -65,19 +122,7 @@ class EditContact extends HookWidget {
       return null;
     }, [snapshot.data]);
 
-    /* if routesArg is null and uploadimage.runtimeType is Xfile we give the link of existing photo on the server.
-    This means the photo haven't been uploaded.
-    */
-    // if (routesArg != null &&
-    //     uploadimage.runtimeType != XFile &&
-    //     uploadCancelled != true) {
-    //   if (routesArg["photo"] == "http://10.0.2.2:8000aucun") {
-    //     uploadimage = null;
-    //   } else {
-    //     uploadimage = routesArg["photo"];
-    //   }
-    // }
-
+    // Future to update a specific contact
     Future<void> updateContact(
         nom, prenoms, email, phone, upimage, id, context) async {
       var postUri = Uri.parse(
@@ -109,7 +154,7 @@ class EditContact extends HookWidget {
       // ignore: unused_local_variable
       final http.StreamedResponse response = await request.send();
 
-      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+      // Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
       Navigator.pushNamed(context, '/viewContact', arguments: {
         'id': id,
       });
@@ -407,6 +452,12 @@ class EditContact extends HookWidget {
                     return sysLng == "fr"
                         ? 'Entrez votre adresse email'
                         : 'Enter your email address';
+                  } else {
+                    if (EmailValidator.validate(value) == false) {
+                      return sysLng == "fr"
+                          ? 'Entrez une addresse email correct; l\'adresse email doit contenir un "@" et un "."'
+                          : 'Enter a valid email address; the email address must have an "@" and a "';
+                    }
                   }
                   return null;
                 },
@@ -495,3 +546,10 @@ class EditContact extends HookWidget {
     );
   }
 }
+
+/*
+Developped by Yao Dabara Mickael
+phone: +2250779549937
+email: dabarayao@gmail.com
+telegram: @yiox2048
+ */

@@ -171,6 +171,28 @@ class ContactController extends Controller
         }
     }
 
+    public function destroyMulMob($contact)
+    {
+        //
+
+
+
+        $piece = explode(";", $contact);
+        $result = "failed";
+
+        foreach ($piece as $pieces) {
+            $delCont = contact::find($pieces);
+            global $result;
+
+            if ($delCont != null) {
+                $delCont->delete();
+                $result = "success";
+            }
+        }
+
+        return $result;
+    }
+
     public function destroy(contact $contact)
     {
         //

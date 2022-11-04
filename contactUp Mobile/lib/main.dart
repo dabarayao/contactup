@@ -1,15 +1,20 @@
-import 'package:flutter/material.dart';
+/*This is the main page where all windows are located */
+
+import 'package:flutter/material.dart'
+    show BuildContext, MaterialApp, State, StatefulWidget, Widget, runApp;
 import 'add_edit/add_contact.dart';
 import 'add_edit/edit_contact.dart';
 import 'contact_list/contact_list.dart';
 import 'contact_list/fav_contact.dart';
 import 'view/view_contact.dart';
-import './splashPage.dart';
 import './contact_list/arch_contact.dart';
 import './about_settings/about.dart';
 import './about_settings/settings.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart'
+    show ChangeNotifierProvider, MultiProvider; // Importing provider module
+import './splashPage.dart';
 
+// The main class which run the app
 void main() {
   runApp(
     MultiProvider(
@@ -20,6 +25,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => LoadContactFav()),
         ChangeNotifierProvider(create: (_) => GlobalSearchArch()),
         ChangeNotifierProvider(create: (_) => LoadContactArch()),
+        ChangeNotifierProvider(create: (_) => SelectedContacts()),
       ],
       child: MyApp(),
     ),
@@ -41,14 +47,14 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    // The materialApp widget with all routes for the application
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Contact up', // the name of the material page
       initialRoute: '/',
       routes: {
-        '/': (context) => SplashPage(),
         // When navigating to the "/home" route, build the FirstScreen widget.
-        '/home': (context) => ContactList(),
+        '/': (context) => ContactList(),
 
         // When navigating to the "/addContact" route, build the  AddContact widget.
         '/addContact': (context) => AddContact(),
@@ -63,3 +69,10 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+/*
+Developped by Yao Dabara Mickael
+phone: +2250779549937
+email: dabarayao@gmail.com
+telegram: @yiox2048
+ */
