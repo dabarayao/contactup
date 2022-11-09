@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:contactup/contact_list/contact_list.dart';
 import 'package:flutter/material.dart'
     show
         AlertDialog,
@@ -109,6 +110,31 @@ class LoadContactArch with ChangeNotifier {
 
 }
 
+// Provider for the contacts in order to load or reload them
+class SelectedContactsArch with ChangeNotifier {
+  List _selectedContacts = [];
+
+  List get selectedContacts => _selectedContacts;
+
+  void newSelectedContacts(value) {
+    _selectedContacts.add(value);
+
+    notifyListeners();
+  }
+
+  void removeSelectedContacts(value) {
+    _selectedContacts.removeWhere((item) => item == value);
+
+    notifyListeners();
+  }
+
+  void emptySelectedContacts() {
+    _selectedContacts.clear();
+
+    notifyListeners();
+  }
+}
+
 // Future to archive or unarchive contacts
 Future updateArch(archId, archive) async {
   var postUri = Uri.parse(
@@ -208,10 +234,14 @@ class ArchContactList extends HookWidget {
     final snapshot = useFuture(future,
         initialData:
             null); // Hook variable which catches the datas of the sharePreferences
-    context.read<LoadContactArch>().changeAllContacts(fetchArchContacts(
-        http.Client(),
-        context,
-        sysLng)); // Loading all the contacts by calling a method of his provider
+
+    if (context.watch<SelectedContactsArch>().selectedContacts.isEmpty) {
+      context.read<LoadContactArch>().changeAllContacts(fetchArchContacts(
+          http.Client(),
+          context,
+          sysLng)); // Loading all the contacts by calling a method of his provider if ther's none selectedContacts
+    }
+
     var loadContact = context.watch<LoadContactArch>().allContacts;
 
     context.read<GlobalSearchArch>().changeGlobalSearchValue(
@@ -232,7 +262,9 @@ class ArchContactList extends HookWidget {
       backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
       appBar: DefaultAppBar(
           globalSearchValue: context.read<GlobalSearchArch>(),
-          title: 'Archive'),
+          title: 'Archive',
+          selCont: context.watch<SelectedContactsArch>(),
+          theme: _darkTheme),
       drawer: Drawer(
         backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
         // Add a ListView to the drawer. This ensures the user can scroll
@@ -324,27 +356,6 @@ class ArchContactList extends HookWidget {
                         primary: Color(0xFFF2B538),
                         onPrimary: Color(0XFF142641)),
                     onPressed: () {
-                      // check if there's network to reload the data
-                      http
-                          .get(Uri.parse("http://10.0.2.2:8000"))
-                          .timeout(const Duration(seconds: 1))
-                          .catchError((e) {
-                        var snackBar = SnackBar(
-                          content: Text(sysLng == "fr"
-                              ? 'Vérifiez votre connexion internet'
-                              : "Check your internet connexion"),
-                          action: SnackBarAction(
-                            label: 'Ok',
-                            onPressed: () {
-                              // Some code to undo the change.
-                            },
-                          ),
-                        );
-
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(snackBar); // Finally, callback fires.
-                      });
-
                       // try reloading data with internet connection
                       context.read<LoadContactArch>().changeAllContacts(
                           fetchArchContacts(http.Client(), context, sysLng));
@@ -356,11 +367,38 @@ class ArchContactList extends HookWidget {
                             content: Text(sysLng == "fr"
                                 ? 'Vérifiez votre connexion internet'
                                 : "Check your internet connexion"),
+                            action: SnackBarAction(
+                              label: 'Ok',
+                              onPressed: () {
+                                // Some code to undo the change.
+                              },
+                            ),
                           );
 
 // Find the ScaffoldMessenger in the widget tree
 // and use it to show a SnackBar.
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        } else {
+                          // check if there's network to reload the data
+                          http
+                              .get(Uri.parse("http://10.0.2.2:8000"))
+                              .timeout(const Duration(seconds: 1))
+                              .catchError((e) {
+                            var snackBar = SnackBar(
+                              content: Text(sysLng == "fr"
+                                  ? 'Vérifiez votre connexion internet'
+                                  : "Check your internet connexion"),
+                              action: SnackBarAction(
+                                label: 'Ok',
+                                onPressed: () {
+                                  // Some code to undo the change.
+                                },
+                              ),
+                            );
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                snackBar); // Finally, callback fires.
+                          });
                         }
                       });
                     },
@@ -370,13 +408,7 @@ class ArchContactList extends HookWidget {
                 ],
               );
             } else if (snapshot.hasData) {
-              return RefreshIndicator(
-                  onRefresh: () async {
-                    context.read<LoadContactArch>().changeAllContacts(
-                        fetchArchContacts(http.Client(), context, sysLng));
-                  },
-                  child: ArchContactsItems(
-                      contacts: snapshot.data!, lang: sysLng));
+              return ArchContactsItems(contacts: snapshot.data!, lang: sysLng);
             } else {
               return const Center(
                 child: CircularProgressIndicator(
@@ -406,100 +438,189 @@ class ArchContactsItems extends HookWidget {
         .watch<GlobalSearchArch>()
         .globalSearchValue; // Hooks variable which contains the search text from the serach input
 
+    var selectedContacts =
+        context.watch<SelectedContactsArch>().selectedContacts;
+
     // Checking if the favorites list is not empty or not
     if (contacts.isNotEmpty) {
       // Checking if the search text is empty or not
       if (context.watch<GlobalSearchArch>().globalSearchValue == "") {
-        return ListView.builder(
-          itemCount: contacts.length,
-          itemBuilder: (context, index) {
-            // ignore: prefer_const_constructors
-            return Slidable(
-                // Specify a key if the Slidable is dismissible.
-                key: ValueKey(0),
-
-                // The start action pane is the one at the left or the top side.
-                startActionPane: ActionPane(
-                  // A motion is a widget used to control how the pane animates.
-                  motion: const ScrollMotion(),
-
-                  // A pane can dismiss the Slidable.
-                  dismissible: DismissiblePane(onDismissed: () {
-                    updateArch(contacts[index].id, contacts[index].isArch);
-                  }),
-
-                  // All actions are defined in the children parameter.
-                  children: [
-                    // A SlidableAction can have an icon and/or a label.
-                    SlidableAction(
-                      // An action can be bigger than the others.
-                      flex: 2,
-                      onPressed: (BuildContext context) {
-                        updateArch(contacts[index].id, contacts[index].isArch);
-
-                        context.read<LoadContactArch>().changeAllContacts(
-                            fetchArchContacts(http.Client(), context, lang));
-                      },
-                      backgroundColor: Color(0xFFF2B538),
-                      foregroundColor: Colors.white,
-                      icon: Icons.unarchive,
-                      label: 'Restaurer',
-                    ),
-                  ],
-                ),
-
-                // The end action pane is the one at the right or the bottom side.
-                endActionPane: ActionPane(
-                  motion: const ScrollMotion(),
-                  dismissible: DismissiblePane(onDismissed: () {
-                    updateArch(contacts[index].id, contacts[index].isArch);
-                  }),
-                  children: [
-                    SlidableAction(
-                      // An action can be bigger than the others.
-                      flex: 2,
-                      onPressed: (BuildContext context) {
-                        updateArch(contacts[index].id, contacts[index].isArch);
-
-                        context.read<LoadContactArch>().changeAllContacts(
-                            fetchArchContacts(http.Client(), context, lang));
-                      },
-                      backgroundColor: Color(0xFFF2B538),
-                      foregroundColor: Colors.white,
-                      icon: Icons.unarchive,
-                      label: 'Restaurer',
-                    ),
-                  ],
-                ),
-
-                // The child of the Slidable is what the user sees when the
-                // component is not dragged.
-                child: ListTile(
-                    onTap: () {
-                      // push to viewContact route with some parameters
-                      Navigator.pushNamed(context, '/viewContact', arguments: {
-                        'id': contacts[index].id,
-                        'route': "home"
-                      });
-                    },
-                    textColor: _darkTheme ? Colors.white : null,
-                    leading: CachedNetworkImage(
-                      imageUrl: "http://10.0.2.2:8000${contacts[index].photo}",
-                      placeholder: (context, url) =>
-                          CircularProgressIndicator(),
-                      errorWidget: (context, url, error) => Icon(
-                        Icons.person,
-                        size: 48,
-                      ),
-                    ),
-                    title: Text(
-                      "${StringUtils.capitalize(contacts[index].prenoms)} ${StringUtils.capitalize(contacts[index].nom)}",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Text('${contacts[index].phone}')));
-            //return Image.network(contacts[index].photo);
+        return RefreshIndicator(
+          onRefresh: () async {
+            context.read<LoadContactArch>().changeAllContacts(
+                fetchArchContacts(http.Client(), context, lang));
           },
+          child: ListView.builder(
+            itemCount: contacts.length,
+            itemBuilder: (context, index) {
+              // ignore: prefer_const_constructors
+              return Slidable(
+                  // Specify a key if the Slidable is dismissible.
+                  key: ValueKey(0),
+
+                  // The start action pane is the one at the left or the top side.
+                  startActionPane: ActionPane(
+                    // A motion is a widget used to control how the pane animates.
+                    motion: const ScrollMotion(),
+
+                    // A pane can dismiss the Slidable.
+                    dismissible: DismissiblePane(onDismissed: () {
+                      updateArch(contacts[index].id, contacts[index].isArch);
+                    }),
+
+                    // All actions are defined in the children parameter.
+                    children: [
+                      // A SlidableAction can have an icon and/or a label.
+                      SlidableAction(
+                        // An action can be bigger than the others.
+                        flex: 2,
+                        onPressed: (BuildContext context) {
+                          updateArch(
+                              contacts[index].id, contacts[index].isArch);
+
+                          context.read<LoadContactArch>().changeAllContacts(
+                              fetchArchContacts(http.Client(), context, lang));
+                        },
+                        backgroundColor: Color(0xFFF2B538),
+                        foregroundColor: Colors.white,
+                        icon: Icons.unarchive,
+                        label: 'Restaurer',
+                      ),
+                    ],
+                  ),
+
+                  // The end action pane is the one at the right or the bottom side.
+                  endActionPane: ActionPane(
+                    motion: const ScrollMotion(),
+                    dismissible: DismissiblePane(onDismissed: () {
+                      updateArch(contacts[index].id, contacts[index].isArch);
+                    }),
+                    children: [
+                      SlidableAction(
+                        // An action can be bigger than the others.
+                        flex: 2,
+                        onPressed: (BuildContext context) {
+                          updateArch(
+                              contacts[index].id, contacts[index].isArch);
+
+                          context.read<LoadContactArch>().changeAllContacts(
+                              fetchArchContacts(http.Client(), context, lang));
+                        },
+                        backgroundColor: Color(0xFFF2B538),
+                        foregroundColor: Colors.white,
+                        icon: Icons.unarchive,
+                        label: 'Restaurer',
+                      ),
+                    ],
+                  ),
+
+                  // The child of the Slidable is what the user sees when the
+                  // component is not dragged.
+                  child: ListTile(
+                      onTap: () {
+                        // push to viewContact route with some parameters
+                        if (selectedContacts.isNotEmpty) {
+                          if (selectedContacts.contains(contacts[index].id)) {
+                            context
+                                .read<SelectedContactsArch>()
+                                .removeSelectedContacts(contacts[index].id);
+                          } else {
+                            context
+                                .read<SelectedContactsArch>()
+                                .newSelectedContacts(contacts[index].id);
+                          }
+                        } else {
+                          Navigator.pushNamed(context, '/viewContact',
+                              arguments: {
+                                'id': contacts[index].id,
+                                'route': "archsContact"
+                              });
+                        }
+
+                        // Test connectivity async Future
+                        checkInternetConnection().then((internet) {
+                          if (internet == false) {
+                            context
+                                .read<SelectedContactsArch>()
+                                .emptySelectedContacts();
+                            var snackBar = SnackBar(
+                              content: Text(lang == "fr"
+                                  ? 'Vérifiez votre connexion internet'
+                                  : "Check your internet connexion"),
+                              action: SnackBarAction(
+                                label: 'Ok',
+                                onPressed: () {
+                                  // Some code to undo the change.
+                                },
+                              ),
+                            );
+
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                          }
+                        });
+                      },
+                      onLongPress: () {
+                        if (selectedContacts.contains(contacts[index].id)) {
+                          context
+                              .read<SelectedContactsArch>()
+                              .removeSelectedContacts(contacts[index].id);
+                        } else {
+                          context
+                              .read<SelectedContactsArch>()
+                              .newSelectedContacts(contacts[index].id);
+                        }
+
+                        // Test connectivity async Future
+                        checkInternetConnection().then((internet) {
+                          if (internet == false) {
+                            context
+                                .read<SelectedContactsArch>()
+                                .emptySelectedContacts();
+                            var snackBar = SnackBar(
+                              content: Text(lang == "fr"
+                                  ? 'Vérifiez votre connexion internet'
+                                  : "Check your internet connexion"),
+                              action: SnackBarAction(
+                                label: 'Ok',
+                                onPressed: () {
+                                  // Some code to undo the change.
+                                },
+                              ),
+                            );
+
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                          }
+                        });
+                      },
+                      textColor: _darkTheme ? Colors.white : null,
+                      selected: selectedContacts.contains(contacts[index].id)
+                          ? true
+                          : false,
+                      selectedColor: _darkTheme ? Colors.white : Colors.black,
+                      selectedTileColor:
+                          const Color(0xFFF2B538).withOpacity(0.3),
+                      leading: CachedNetworkImage(
+                        imageUrl:
+                            "http://10.0.2.2:8000${contacts[index].photo}",
+                        placeholder: (context, url) =>
+                            CircularProgressIndicator(),
+                        errorWidget: (context, url, error) => Icon(
+                          Icons.person,
+                          size: 48,
+                          color: _darkTheme ? Colors.blueGrey : null,
+                        ),
+                      ),
+                      title: Text(
+                        "${StringUtils.capitalize(contacts[index].prenoms)} ${StringUtils.capitalize(contacts[index].nom)}",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text('${contacts[index].phone}')));
+              //return Image.network(contacts[index].photo);
+            },
+          ),
         );
       } else {
         return ListView.builder(
@@ -600,6 +721,7 @@ class ArchContactsItems extends HookWidget {
                         errorWidget: (context, url, error) => Icon(
                           Icons.person,
                           size: 48,
+                          color: _darkTheme ? Colors.blueGrey : null,
                         ),
                       ),
                       title: Text(
@@ -608,42 +730,6 @@ class ArchContactsItems extends HookWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       subtitle: Text('${contacts[index].phone}'),
-                      trailing: IconButton(
-                          icon: Icon(
-                            contacts[index].isFav
-                                ? Icons.star
-                                : Icons.star_border,
-                            color: contacts[index].isFav
-                                ? Color(0xFFF2B538)
-                                : Color(0XFF1F1F30),
-                          ),
-                          onPressed: () {
-                            // If there is network, the datas are saved or else an alert error is shown
-                            http
-                                .get(Uri.parse('http://10.0.2.2:8000/'))
-                                .timeout(const Duration(seconds: 1))
-                                .catchError((e) {
-                              var snackBar = SnackBar(
-                                content: Text(lang == "fr"
-                                    ? 'Vérifiez votre connexion internet'
-                                    : "Check your internet connexion"),
-                                action: SnackBarAction(
-                                  label: 'Ok',
-                                  onPressed: () {
-                                    // Some code to undo the change.
-                                  },
-                                ),
-                              );
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  snackBar); // Finally, callback fires.
-                            }).whenComplete(() {
-                              updateFav(
-                                  contacts[index].id, contacts[index].isFav);
-
-                              Navigator.of(context).pushNamed('/');
-                            });
-                          }),
                     ))
                 : Text("");
             //return Image.network(contacts[index].photo);

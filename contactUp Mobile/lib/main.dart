@@ -26,6 +26,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => GlobalSearchArch()),
         ChangeNotifierProvider(create: (_) => LoadContactArch()),
         ChangeNotifierProvider(create: (_) => SelectedContacts()),
+        ChangeNotifierProvider(create: (_) => SelectedContactsFav()),
+        ChangeNotifierProvider(create: (_) => SelectedContactsArch()),
       ],
       child: MyApp(),
     ),

@@ -63,7 +63,7 @@ import 'package:flutter_hooks/flutter_hooks.dart'
 
 import "../utils/appBar.dart";
 
-import 'dart:io' show Platform;
+import 'dart:io' show HttpHeaders, Platform;
 import 'package:http/http.dart' as http
     show
         MultipartRequest,
@@ -169,9 +169,14 @@ Future<void> updateFav(favId, favorite) async {
 
 // A future to get all the contacts
 Future<List<Contact>> fetchContacts(http.Client client, context, lang) async {
-  final response = await client.get(Uri.parse('http://10.0.2.2:8000/')).timeout(
-        const Duration(seconds: 2),
-      );
+  final response =
+      await client.get(Uri.parse('http://10.0.2.2:8000/'), headers: {
+    HttpHeaders.contentTypeHeader: "application/json",
+    "Connection": "Keep-Alive",
+    "Keep-Alive": "timeout=2, max=1000"
+  }).timeout(
+    const Duration(seconds: 3),
+  );
 
   // Use the compute function to run parsePhotos in a separate isolate.
   return compute(parseContacts, response.body);
@@ -231,11 +236,26 @@ class ContactList extends HookWidget {
     final snapshot = useFuture(future,
         initialData:
             null); // Hook variable which catches the datas of the sharePreferences
-    context.read<LoadContact>().changeAllContacts(fetchContacts(
-        http.Client(),
-        context,
-        sysLng)); // Loading all the contacts by calling a method of his provider
+
+    if (context.watch<SelectedContacts>().selectedContacts.isEmpty) {
+      context.read<LoadContact>().changeAllContacts(fetchContacts(
+          http.Client(),
+          context,
+          sysLng)); // Loading all the contacts by calling a method of his provider if ther's none selectedContacts
+    }
+
     var loadContact = context.watch<LoadContact>().allContacts;
+
+    // Lifecycle to load the Theme and and the language of the application if they have been saved.
+    useEffect(() {
+      final prefs = snapshot.data;
+      if (prefs == null) {
+        return;
+      }
+      sysLng = (prefs.getString('lang') ?? Platform.localeName.split('_')[0]);
+      _darkTheme = (prefs.getBool('darkTheme') ?? false);
+      return null;
+    }, [loadContact]);
 
     context.read<GlobalSearch>().changeGlobalSearchValue(
         ""); // Erase the globalSearch previous value from the Search input
@@ -256,7 +276,9 @@ class ContactList extends HookWidget {
       appBar: DefaultAppBar(
           globalSearchValue: context.read<GlobalSearch>(),
           title: "Contact Up",
-          selCont: context.watch<SelectedContacts>()),
+          selCont: context.watch<SelectedContacts>(),
+          lang: sysLng,
+          theme: _darkTheme),
       drawer: Drawer(
         backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
         // Add a ListView to the drawer. This ensures the user can scroll
@@ -347,27 +369,6 @@ class ContactList extends HookWidget {
                         primary: Color(0xFFF2B538),
                         onPrimary: Color(0XFF142641)),
                     onPressed: () {
-                      // check if there's network to reload the data
-                      http
-                          .get(Uri.parse("http://10.0.2.2:8000"))
-                          .timeout(const Duration(seconds: 1))
-                          .catchError((e) {
-                        var snackBar = SnackBar(
-                          content: Text(sysLng == "fr"
-                              ? 'Vérifiez votre connexion internet'
-                              : "Check your internet connexion"),
-                          action: SnackBarAction(
-                            label: 'Ok',
-                            onPressed: () {
-                              // Some code to undo the change.
-                            },
-                          ),
-                        );
-
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(snackBar); // Finally, callback fires.
-                      });
-
                       // try reloading data with internet connection
                       context.read<LoadContact>().changeAllContacts(
                           fetchContacts(http.Client(), context, sysLng));
@@ -379,11 +380,38 @@ class ContactList extends HookWidget {
                             content: Text(sysLng == "fr"
                                 ? 'Vérifiez votre connexion internet'
                                 : "Check your internet connexion"),
+                            action: SnackBarAction(
+                              label: 'Ok',
+                              onPressed: () {
+                                // Some code to undo the change.
+                              },
+                            ),
                           );
 
 // Find the ScaffoldMessenger in the widget tree
 // and use it to show a SnackBar.
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        } else {
+                          // check if there's network to reload the data
+                          http
+                              .get(Uri.parse("http://10.0.2.2:8000"))
+                              .timeout(const Duration(seconds: 2))
+                              .catchError((e) {
+                            var snackBar = SnackBar(
+                              content: Text(sysLng == "fr"
+                                  ? 'Vérifiez votre connexion internet'
+                                  : "Check your internet connexion"),
+                              action: SnackBarAction(
+                                label: 'Ok',
+                                onPressed: () {
+                                  // Some code to undo the change.
+                                },
+                              ),
+                            );
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                snackBar); // Finally, callback fires.
+                          });
                         }
                       });
                     },
@@ -393,12 +421,7 @@ class ContactList extends HookWidget {
                 ],
               );
             } else if (snapshot.hasData) {
-              return RefreshIndicator(
-                  onRefresh: () async {
-                    context.read<LoadContact>().changeAllContacts(
-                        fetchContacts(http.Client(), context, sysLng));
-                  },
-                  child: ContactsItems(contacts: snapshot.data!, lang: sysLng));
+              return ContactsItems(contacts: snapshot.data!, lang: sysLng);
             } else {
               return const Center(
                 child: CircularProgressIndicator(color: Color(0xFFF2B538)),
@@ -430,137 +453,108 @@ class ContactsItems extends HookWidget {
     if (contacts.isNotEmpty) {
       // Checking if the search text is empty or not
       if (context.watch<GlobalSearch>().globalSearchValue == "") {
-        return ListView.builder(
-          itemCount: contacts.length,
-          itemBuilder: (context, index) {
-            // ignore: prefer_const_constructors
-            // Filtering the serachValue with the favorite's contact list
-            return Slidable(
-                // Specify a key if the Slidable is dismissible.
-                key: ValueKey(0),
+        return RefreshIndicator(
+          onRefresh: () async {
+            context
+                .read<LoadContact>()
+                .changeAllContacts(fetchContacts(http.Client(), context, lang));
+          },
+          child: ListView.builder(
+            itemCount: contacts.length,
+            itemBuilder: (context, index) {
+              // ignore: prefer_const_constructors
+              // Filtering the serachValue with the favorite's contact list
+              return Slidable(
+                  // Specify a key if the Slidable is dismissible.
+                  key: ValueKey(0),
 
-                // The start action pane is the one at the left or the top side.
-                startActionPane: ActionPane(
-                  // A motion is a widget used to control how the pane animates.
-                  motion: const ScrollMotion(),
+                  // The start action pane is the one at the left or the top side.
+                  startActionPane: ActionPane(
+                    // A motion is a widget used to control how the pane animates.
+                    motion: const ScrollMotion(),
 
-                  // A pane can dismiss the Slidable.
-                  dismissible: DismissiblePane(onDismissed: () {
-                    updateArch(
-                        contacts[index].id, contacts[index].isArch, context);
-                  }),
+                    // A pane can dismiss the Slidable.
+                    dismissible: DismissiblePane(onDismissed: () {
+                      updateArch(
+                          contacts[index].id, contacts[index].isArch, context);
+                    }),
 
-                  // All actions are defined in the children parameter.
-                  children: [
-                    // A SlidableAction can have an icon and/or a label.
-                    SlidableAction(
-                      // An action can be bigger than the others.
-                      flex: 2,
-                      onPressed: (BuildContext context) {
-                        updateArch(contacts[index].id, contacts[index].isArch,
-                            context);
+                    // All actions are defined in the children parameter.
+                    children: [
+                      // A SlidableAction can have an icon and/or a label.
+                      SlidableAction(
+                        // An action can be bigger than the others.
+                        flex: 2,
+                        onPressed: (BuildContext context) {
+                          updateArch(contacts[index].id, contacts[index].isArch,
+                              context);
 
-                        context.read<LoadContact>().changeAllContacts(
-                            fetchContacts(http.Client(), context, lang));
-                      },
-                      backgroundColor: Color(0xFFF2B538),
-                      foregroundColor: Colors.white,
-                      icon: Icons.archive,
-                      label: 'Archive',
-                    ),
-                  ],
-                ),
-
-                // The end action pane is the one at the right or the bottom side.
-                endActionPane: ActionPane(
-                  motion: const ScrollMotion(),
-                  dismissible: DismissiblePane(onDismissed: () {
-                    updateArch(
-                        contacts[index].id, contacts[index].isArch, context);
-                  }),
-                  children: [
-                    SlidableAction(
-                      // An action can be bigger than the others.
-                      flex: 2,
-                      onPressed: (BuildContext context) {
-                        updateArch(contacts[index].id, contacts[index].isArch,
-                            context);
-
-                        context.read<LoadContact>().changeAllContacts(
-                            fetchContacts(http.Client(), context, lang));
-                      },
-                      backgroundColor: Color(0xFFF2B538),
-                      foregroundColor: Colors.white,
-                      icon: Icons.archive,
-                      label: 'Archive',
-                    ),
-                  ],
-                ),
-
-                // The child of the Slidable is what the user sees when the
-                // component is not dragged.
-                child: ListTile(
-                  onTap: () {
-                    // push to viewContact route with some parameters
-                    if (selectedContacts.isNotEmpty) {
-                      if (selectedContacts.contains(contacts[index].id)) {
-                        context
-                            .read<SelectedContacts>()
-                            .removeSelectedContacts(contacts[index].id);
-                      } else {
-                        context
-                            .read<SelectedContacts>()
-                            .newSelectedContacts(contacts[index].id);
-                      }
-                    } else {
-                      Navigator.pushNamed(context, '/viewContact', arguments: {
-                        'id': contacts[index].id,
-                        'route': "home"
-                      });
-                    }
-                  },
-                  onLongPress: () {
-                    if (!selectedContacts.contains(contacts[index].id)) {
-                      context
-                          .read<SelectedContacts>()
-                          .newSelectedContacts(contacts[index].id);
-                    }
-
-                    print(selectedContacts);
-                  },
-                  textColor: _darkTheme ? Colors.white : null,
-                  selected: selectedContacts.contains(contacts[index].id)
-                      ? true
-                      : false,
-                  selectedColor: _darkTheme ? Colors.white : Colors.black,
-                  selectedTileColor: const Color(0xFFF2B538).withOpacity(0.3),
-                  leading: CachedNetworkImage(
-                    imageUrl: "http://10.0.2.2:8000${contacts[index].photo}",
-                    placeholder: (context, url) => CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => Icon(
-                      Icons.person,
-                      size: 48,
-                    ),
-                  ),
-                  title: Text(
-                    "${StringUtils.capitalize(contacts[index].prenoms)} ${StringUtils.capitalize(contacts[index].nom)}",
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text('${contacts[index].phone}'),
-                  trailing: IconButton(
-                      icon: Icon(
-                        contacts[index].isFav ? Icons.star : Icons.star_border,
-                        color: contacts[index].isFav
-                            ? Color(0xFFF2B538)
-                            : Color(0XFF1F1F30),
+                          context.read<LoadContact>().changeAllContacts(
+                              fetchContacts(http.Client(), context, lang));
+                        },
+                        backgroundColor: Color(0xFFF2B538),
+                        foregroundColor: Colors.white,
+                        icon: Icons.archive,
+                        label: 'Archive',
                       ),
-                      onPressed: () {
-                        // If there is network, the contact become favorite or else a snackbar error is shown
-                        http
-                            .get(Uri.parse('http://10.0.2.2:8000/'))
-                            .timeout(const Duration(seconds: 1))
-                            .catchError((e) {
+                    ],
+                  ),
+
+                  // The end action pane is the one at the right or the bottom side.
+                  endActionPane: ActionPane(
+                    motion: const ScrollMotion(),
+                    dismissible: DismissiblePane(onDismissed: () {
+                      updateArch(
+                          contacts[index].id, contacts[index].isArch, context);
+                    }),
+                    children: [
+                      SlidableAction(
+                        // An action can be bigger than the others.
+                        flex: 2,
+                        onPressed: (BuildContext context) {
+                          updateArch(contacts[index].id, contacts[index].isArch,
+                              context);
+
+                          context.read<LoadContact>().changeAllContacts(
+                              fetchContacts(http.Client(), context, lang));
+                        },
+                        backgroundColor: Color(0xFFF2B538),
+                        foregroundColor: Colors.white,
+                        icon: Icons.archive,
+                        label: 'Archive',
+                      ),
+                    ],
+                  ),
+
+                  // The child of the Slidable is what the user sees when the
+                  // component is not dragged.
+                  child: ListTile(
+                    onTap: () {
+                      // push to viewContact route with some parameters
+                      if (selectedContacts.isNotEmpty) {
+                        if (selectedContacts.contains(contacts[index].id)) {
+                          context
+                              .read<SelectedContacts>()
+                              .removeSelectedContacts(contacts[index].id);
+                        } else {
+                          context
+                              .read<SelectedContacts>()
+                              .newSelectedContacts(contacts[index].id);
+                        }
+                      } else {
+                        Navigator.pushNamed(context, '/viewContact',
+                            arguments: {
+                              'id': contacts[index].id,
+                              'route': "home"
+                            });
+                      }
+
+                      // Test connectivity async Future
+                      checkInternetConnection().then((internet) {
+                        if (internet == false) {
+                          context
+                              .read<SelectedContacts>()
+                              .emptySelectedContacts();
                           var snackBar = SnackBar(
                             content: Text(lang == "fr"
                                 ? 'Vérifiez votre connexion internet'
@@ -574,19 +568,108 @@ class ContactsItems extends HookWidget {
                           );
 
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        }).whenComplete(() {
-                          updateFav(
-                            contacts[index].id,
-                            contacts[index].isFav,
+                        }
+                      });
+                    },
+                    onLongPress: () {
+                      if (selectedContacts.contains(contacts[index].id)) {
+                        context
+                            .read<SelectedContacts>()
+                            .removeSelectedContacts(contacts[index].id);
+                      } else {
+                        context
+                            .read<SelectedContacts>()
+                            .newSelectedContacts(contacts[index].id);
+                      }
+
+                      // Test connectivity async Future
+                      checkInternetConnection().then((internet) {
+                        if (internet == false) {
+                          context
+                              .read<SelectedContacts>()
+                              .emptySelectedContacts();
+                          var snackBar = SnackBar(
+                            content: Text(lang == "fr"
+                                ? 'Vérifiez votre connexion internet'
+                                : "Check your internet connexion"),
+                            action: SnackBarAction(
+                              label: 'Ok',
+                              onPressed: () {
+                                // Some code to undo the change.
+                              },
+                            ),
                           );
 
-                          context.read<LoadContact>().changeAllContacts(
-                              fetchContacts(http.Client(), context, lang));
-                        });
-                      }),
-                ));
-            //return Image.network(contacts[index].photo);
-          },
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        }
+                      });
+                    },
+                    textColor: _darkTheme ? Colors.white : null,
+                    selected: selectedContacts.contains(contacts[index].id)
+                        ? true
+                        : false,
+                    selectedColor: _darkTheme ? Colors.white : Colors.black,
+                    selectedTileColor: const Color(0xFFF2B538).withOpacity(0.3),
+                    leading: CachedNetworkImage(
+                      imageUrl: "http://10.0.2.2:8000${contacts[index].photo}",
+                      placeholder: (context, url) =>
+                          CircularProgressIndicator(),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.person,
+                        size: 48,
+                        color: _darkTheme ? Colors.blueGrey : null,
+                      ),
+                    ),
+                    title: Text(
+                      "${StringUtils.capitalize(contacts[index].prenoms)} ${StringUtils.capitalize(contacts[index].nom)}",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text('${contacts[index].phone}'),
+                    trailing: IconButton(
+                        icon: Icon(
+                          contacts[index].isFav
+                              ? Icons.star
+                              : Icons.star_border,
+                          color: contacts[index].isFav
+                              ? Color(0xFFF2B538)
+                              : _darkTheme
+                                  ? Colors.white
+                                  : Color(0XFF1F1F30),
+                        ),
+                        onPressed: () {
+                          // If there is network, the contact become favorite or else a snackbar error is shown
+                          http
+                              .get(Uri.parse('http://10.0.2.2:8000/'))
+                              .timeout(const Duration(seconds: 1))
+                              .catchError((e) {
+                            var snackBar = SnackBar(
+                              content: Text(lang == "fr"
+                                  ? 'Vérifiez votre connexion internet'
+                                  : "Check your internet connexion"),
+                              action: SnackBarAction(
+                                label: 'Ok',
+                                onPressed: () {
+                                  // Some code to undo the change.
+                                },
+                              ),
+                            );
+
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                          }).whenComplete(() {
+                            updateFav(
+                              contacts[index].id,
+                              contacts[index].isFav,
+                            );
+
+                            Navigator.of(context).pushNamed('/');
+                          });
+                        }),
+                  ));
+              //return Image.network(contacts[index].photo);
+            },
+          ),
         );
       } else {
         return ListView.builder(
@@ -666,11 +749,46 @@ class ContactsItems extends HookWidget {
                     child: ListTile(
                       onTap: () {
                         // push to viewContact route with some parameters
-                        Navigator.pushNamed(context, '/viewContact',
-                            arguments: {
-                              'id': contacts[index].id,
-                              'route': "home"
-                            });
+                        if (selectedContacts.isNotEmpty) {
+                          if (selectedContacts.contains(contacts[index].id)) {
+                            context
+                                .read<SelectedContacts>()
+                                .removeSelectedContacts(contacts[index].id);
+                          } else {
+                            context
+                                .read<SelectedContacts>()
+                                .newSelectedContacts(contacts[index].id);
+                          }
+                        } else {
+                          Navigator.pushNamed(context, '/viewContact',
+                              arguments: {
+                                'id': contacts[index].id,
+                                'route': "home"
+                              });
+                        }
+
+                        // Test connectivity async Future
+                        checkInternetConnection().then((internet) {
+                          if (internet == false) {
+                            context
+                                .read<SelectedContacts>()
+                                .emptySelectedContacts();
+                            var snackBar = SnackBar(
+                              content: Text(lang == "fr"
+                                  ? 'Vérifiez votre connexion internet'
+                                  : "Check your internet connexion"),
+                              action: SnackBarAction(
+                                label: 'Ok',
+                                onPressed: () {
+                                  // Some code to undo the change.
+                                },
+                              ),
+                            );
+
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                          }
+                        });
                       },
                       textColor: _darkTheme ? Colors.white : null,
                       leading: CachedNetworkImage(
@@ -681,6 +799,7 @@ class ContactsItems extends HookWidget {
                         errorWidget: (context, url, error) => Icon(
                           Icons.person,
                           size: 48,
+                          color: _darkTheme ? Colors.blueGrey : null,
                         ),
                       ),
                       title: Text(
@@ -696,7 +815,11 @@ class ContactsItems extends HookWidget {
                                 : Icons.star_border,
                             color: contacts[index].isFav
                                 ? Color(0xFFF2B538)
-                                : Color(0XFF1F1F30),
+                                : _darkTheme
+                                    ? Colors.white
+                                    : _darkTheme
+                                        ? Colors.white
+                                        : Color(0XFF1F1F30),
                           ),
                           onPressed: () {
                             // If there is network, the datas are saved or else an alert error is shown

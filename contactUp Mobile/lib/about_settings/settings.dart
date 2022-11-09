@@ -42,17 +42,17 @@ import 'dart:io' show File, Platform;
 
 bool _darkTheme = false; // The boolean for the dark theme of the application
 
-// Future to share the application
-Future<void> shareApp() async {
-  final bytes = await rootBundle.load('assets/apk/contactup.apk');
-  final list = bytes.buffer.asUint8List();
+// // Future to share the application
+// Future<void> shareApp() async {
+//   final bytes = await rootBundle.load('assets/apk/contactup.apk');
+//   final list = bytes.buffer.asUint8List();
 
-  final tempDir = await getTemporaryDirectory();
-  final file = await File('${tempDir.path}/contactup.apk').create();
-  file.writeAsBytesSync(list);
+//   final tempDir = await getTemporaryDirectory();
+//   final file = await File('${tempDir.path}/contactup.apk').create();
+//   file.writeAsBytesSync(list);
 
-  Share.shareFiles([(file.path)]);
-}
+//   Share.shareFiles([(file.path)]);
+// }
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -286,7 +286,11 @@ class _SettingPageState extends State<SettingPage> {
                 )),
             ListTile(
               onTap: () {
-                shareApp();
+                Share.share(
+                    "https://drive.google.com/file/d/14PYIXEOjtdc8pdJNub8XmE1q_0d0pTrN/view?usp=share_link",
+                    subject: sysLng == "fr"
+                        ? "Contactup - Enregistrer et suivez vos contacts"
+                        : "Contactup - Save and track your contacts");
               },
               textColor: _darkTheme ? Colors.white : null,
               leading: Icon(

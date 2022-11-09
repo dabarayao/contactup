@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\contact;
 use App\Http\Requests\StorecontactRequest;
 use App\Http\Requests\UpdatecontactRequest;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -175,8 +176,6 @@ class ContactController extends Controller
     {
         //
 
-
-
         $piece = explode(";", $contact);
         $result = "failed";
 
@@ -186,6 +185,25 @@ class ContactController extends Controller
 
             if ($delCont != null) {
                 $delCont->delete();
+                $result = "success";
+            }
+        }
+
+        return $result;
+    }
+
+    public function archiveMul($contact)
+    {
+        $piece = explode(";", $contact);
+        $result = "failed";
+
+        foreach ($piece as $pieces) {
+            $archCont = contact::find($pieces);
+            global $result;
+
+            if ($archCont != null) {
+                $archCont->is_arch = !$archCont->is_arch;
+                $archCont->save();
                 $result = "success";
             }
         }

@@ -15,7 +15,7 @@ class VerifyCsrfToken extends Middleware
         //
         "http://10.0.2.2:8000/contact",
         "http://10.0.2.2:8000/contact/edit/*",
-        "http://10.0.2.2:8000/contact/edit/fav/*"
+        "http://10.0.2.2:8000/contact/edit/fav/*",
 
     ];
 }
