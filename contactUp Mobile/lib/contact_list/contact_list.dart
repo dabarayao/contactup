@@ -170,7 +170,7 @@ Future<void> updateFav(favId, favorite) async {
 // A future to get all the contacts
 Future<List<Contact>> fetchContacts(http.Client client, context, lang) async {
   final response =
-      await client.get(Uri.parse('http://10.0.2.2:8000/'), headers: {
+      await client.get(Uri.parse('http://10.0.2.2:8000/contact/list'), headers: {
     HttpHeaders.contentTypeHeader: "application/json",
     "Connection": "Keep-Alive",
     "Keep-Alive": "timeout=2, max=1000"

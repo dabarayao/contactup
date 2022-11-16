@@ -170,11 +170,11 @@ Future<void> updateFav(favId, favorite) async {
 // A future to get all the contacts
 Future<List<ArchContact>> fetchArchContacts(
     http.Client client, context, lang) async {
-  final response = await client.get(Uri.parse('http://10.0.2.2:8000/archs'),
-      headers: {
-        "Connection": "Keep-Alive",
-        "Keep-Alive": "timeout=5, max=1000"
-      }).timeout(const Duration(seconds: 2));
+  final response = await client
+      .get(Uri.parse('http://10.0.2.2:8000/contact/list/archs'), headers: {
+    "Connection": "Keep-Alive",
+    "Keep-Alive": "timeout=5, max=1000"
+  }).timeout(const Duration(seconds: 2));
 
   // Use the compute function to run parsePhotos in a separate isolate.
   return compute(parseArchContacts, response.body);

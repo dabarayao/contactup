@@ -19,7 +19,7 @@ class ContactController extends Controller
     public function index()
     {
         //
-        $contact = contact::where("is_arch", false)->get();
+        $contact = contact::orderBy('created_at', 'DESC')->where("is_arch", false)->get();
 
         return json_encode($contact, JSON_UNESCAPED_SLASHES);
     }
@@ -27,7 +27,7 @@ class ContactController extends Controller
     public function indexFav()
     {
         //
-        $contact = contact::where(["is_fav" => true, "is_arch" => false])->get();
+        $contact = contact::orderBy('created_at', 'DESC')->where(["is_fav" => true, "is_arch" => false])->get();
 
         return json_encode($contact, JSON_UNESCAPED_SLASHES);
     }

@@ -95,7 +95,26 @@ Future<void> archMulContact(
     "Keep-Alive": "timeout=5, max=1000"
   });
 
-  if (response.body == "success") {}
+  if (response.body == "success") {
+    var snackBar = SnackBar(
+        content: Text(lang == "fr"
+            ? title != "Archive"
+                ? "Contacts archivé avec succès"
+                : "Contacts restauré avec succès"
+            : title != "Archive"
+                ? "Contacts archived successfuly"
+                : "Contacts restored successfuly"),
+        action: SnackBarAction(
+          label: 'Ok',
+          onPressed: () {
+            // Some code to undo the change.
+          },
+        ));
+
+// Find the ScaffoldMessenger in the widget tree
+// and use it to show a SnackBar.
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
   // Navigator.of(context).pushNamedAndRemoveUntil('/$route', (route) => false);
 }

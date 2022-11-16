@@ -13,16 +13,30 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/home', function () {
-    return view("welcome");
+// The list of the React's routes
+Route::get('/', function () {
+    return view("home");
+});
+Route::get('/favs', function () {
+    return view("home");
+});
+Route::get('/archs', function () {
+    return view("home");
+});
+Route::get('/about', function () {
+    return view("home");
 });
 
 
+
+
+
+
 // The list of the mobile route
-Route::get('/', [App\Http\Controllers\contactController::class, "index"])->name("home");
+Route::get('/contact/list', [App\Http\Controllers\contactController::class, "index"])->name("home");
 Route::get('/contact/show/{contact}', [App\Http\Controllers\contactController::class, "show"]);
-Route::get('/favs', [App\Http\Controllers\contactController::class, "indexFav"])->name("homeFavs");
-Route::get('/archs', [App\Http\Controllers\contactController::class, "indexArch"])->name("homeArch");
+Route::get('/contact/list/favs', [App\Http\Controllers\contactController::class, "indexFav"])->name("homeFavs");
+Route::get('/contact/list/archs', [App\Http\Controllers\contactController::class, "indexArch"])->name("homeArch");
 
 Route::post('/contact', [App\Http\Controllers\contactController::class, "store"]);
 Route::post('/contact/edit/{contact}', [App\Http\Controllers\contactController::class, "update"]);
