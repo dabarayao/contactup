@@ -9,7 +9,7 @@ import DataGrid, {
   Column, SearchPanel,
     Scrolling, Pager, Paging, Selection
 } from 'devextreme-react/data-grid';
-
+import Swal from 'sweetalert2';
 
 import axios from 'axios';
 
@@ -28,6 +28,7 @@ class Archs extends Component {
     this.state = {
         contacts: "",
         showContactInfo: false,
+        detailId: "",
         detailImage: "",
         detailNom: "",
         detailPrenoms: "",
@@ -37,16 +38,91 @@ class Archs extends Component {
         detailFav: false
     };
 
-    this.fetchData = this.fetchData.bind(this);
+    this.fetchArchData = this.fetchArchData.bind(this);
     this.onSelectionChanged = this.onSelectionChanged.bind(this);
     this.renderGridCell = this.renderGridCell.bind(this);
   }
 
 
-    fetchData = async () => {
-    const response = await axios.get("http://localhost:8000/contact/list/archs")
+    fetchArchData = async () => {
+        const response = await axios.get("http://localhost:8000/contact/list/archs")
+        var resPattern = response.data;
 
-         this.setState({ contacts: response.data})
+        resPattern.forEach((items) => {
+            if (items.photo == null) {
+                items.photo = "https://placehold.co/300x300/f2b538/000000.png?text=" + items.nom[0] + items.prenoms[0];
+            }
+        });
+
+         this.setState({ contacts: resPattern})
+    }
+
+    updateArch = async (contactId, is_arch) => {
+
+        try {
+            const response = await axios.post(`http://localhost:8000/contact/edit/arch/${contactId}`,
+                {
+                    isArch: is_arch
+                },
+                { timeout: 1000 }
+            ).then(function (response) {
+                if (response.status == 200 || response.status == 201) {
+                    Swal.fire({
+                        title: 'Contact Up !',
+                        text: 'Contact restauré avec succès 😃.',
+                        icon: 'success',
+                        confirmButtonText: 'Ok'
+                    });
+                }
+            });
+
+            this.setState({ detailArch: !is_arch });
+            this.fetchArchData();
+        } catch  {
+            Swal.fire({
+                title: 'Server error !',
+                text: 'Vérifier votre connexion internet.',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            });
+        }
+
+
+    }
+
+    deleteContact = async (contactId) => {
+
+        try {
+            const response = await axios.get(`http://localhost:8000/delcontact/${contactId}`,
+                { timeout: 1000 }
+            ).then(function (response) {
+                if (response.status == 200 || response.status == 201) {
+                    Swal.fire({
+                        title: '<span style="color: white; font-weight: bold;">Contact supprimé avec succès</span>',
+                        icon: "success",
+                        iconColor: 'white',
+                        toast: true,
+                        timer: 4000,
+                        position: 'top-right',
+                        background: '#4BB543',
+                       showConfirmButton: false
+                    });
+
+                    return true;
+                }
+            });
+
+            this.fetchArchData();
+        } catch  {
+            Swal.fire({
+                title: 'Server error !',
+                text: 'Vérifier votre connexion internet.',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            });
+        }
+
+
     }
 
     renderGridCell(cellData) {
@@ -57,7 +133,8 @@ class Archs extends Component {
     const data = selectedRowsData[0];
 
     this.setState({
-      showContactInfo: !!data,
+        showContactInfo: !!data,
+        detailId: data && data.id,
         detailImage: data && data.photo,
         detailNom: data && data.nom,
         detailPrenoms: data && data.prenoms,
@@ -71,7 +148,7 @@ class Archs extends Component {
 
 
    componentDidMount() {
-        this.fetchData();
+        this.fetchArchData();
    }
 
 
@@ -83,7 +160,7 @@ class Archs extends Component {
             <div className="container">
                 <br />
                 <nav className="breadcrumb">
-                    <a className="breadcrumb-item" href="#"><i className="fas fa-home"></i>Archive</a>
+                    <a className="breadcrumb-item" href="#"><i className="fas fa-home"></i>Accueil</a>
                     <span className="breadcrumb-item active" aria-current="page">Liste des archives</span>
                 </nav>
             </div>
@@ -98,16 +175,17 @@ class Archs extends Component {
                 this.state.showContactInfo
                 && <div className="container">
 
-                        <div class="d-flex">
-                            <div class="flex-shrink-0">
+                        <div className="d-flex">
+                            <div className="flex-shrink-0">
                                 <img src={this.state.detailImage} alt="" width="200" />
                             </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h5 class="mt-0">{this.state.detailNom} {this.state.detailPrenoms}</h5>
+                            <div className="flex-grow-1 ms-3">
+                                <h5 className="mt-0">{this.state.detailNom} {this.state.detailPrenoms}</h5>
                                 <p>Email: {this.state.detailEmail}</p>
                                 <p>Téléphone: {this.state.detailPhone}</p>
                                 <p>
-                                    <button type="button" class="btn btn-light" data-bs-toggle="tooltip" title="Restaurer"><i class="fal fa-box-open fa-2x"></i></button>
+                                    <button type="button" className="btn btn-light" onClick={() => this.updateArch(this.state.detailId, true)} data-bs-toggle="tooltip" title="Restaurer"><i className="fal fa-box-open fa-2x"></i></button>
+                                    <button type="button" className="btn btn-light text-danger" onClick={() => this.deleteContact(this.state.detailId)}  data-bs-toggle="tooltip" title="Supprimer"><i className="fas fa-trash-alt fa-lg"></i></button>
 
                                 </p>
 

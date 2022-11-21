@@ -5,6 +5,8 @@ import React from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 import Navbar from '../layout/Navbar';
 
+import dabPic from '../../img/dabyao.webp';
+import Logo from '../../img/contact_up.png';
 
 
 function About() {
@@ -13,11 +15,10 @@ function About() {
 
             <Navbar />
 
-            <div class="container">
-                <div className="container">
+            <div className="container">
                     <br />
                     <nav className="breadcrumb">
-                        <a className="breadcrumb-item" href="#"><i className="fas fa-home"></i>A propos</a>
+                        <a className="breadcrumb-item" href="#"><i className="fas fa-home"></i>Accueil</a>
                         <span className="breadcrumb-item active" aria-current="page">A propos de nous</span>
                     </nav>
 
@@ -26,16 +27,16 @@ function About() {
                     {/* <img src="assets/images/contact_up.png" width="200" /> */}
                     <br />
 
-                    <div class="row  align-items-center">
-                        <div class="col-md-4"><img src="assets/images/contact_up.png" width="200" /></div>
-                        <div class="col-md-4">
+                    <div className="row  align-items-center">
+                        <div className="col-md-4"><img src={Logo} width="200" /></div>
+                        <div className="col-md-4">
                             <h3>Informations sur le developpeur</h3>
-                            <div class="d-flex">
-                                <div class="flex-shrink-0">
-                                    <img src="assets/images/dabyao.webp" alt="" width="100" />
+                            <div className="d-flex">
+                                <div className="flex-shrink-0">
+                                    <img src={dabPic} alt="" width="100" />
                                 </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <h5 class="mt-0">Yao Dabara Mickael</h5>
+                                <div className="flex-grow-1 ms-3">
+                                    <h5 className="mt-0">Yao Dabara Mickael</h5>
                                     Tel: +2250779549937<br />
                                     email: dabarayao@gmail.com
 
@@ -50,8 +51,6 @@ function About() {
 
 
 
-
-                </div>
 
 
             </div>

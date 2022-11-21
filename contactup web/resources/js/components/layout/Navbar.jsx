@@ -1,12 +1,14 @@
 import React from 'react';
 import { NavLink } from "react-router-dom";
 
+import Logo from '../../img/contact_up.png';
+
 
 function Navbar() {
     return (
         <nav className="navbar navbar-expand-sm navbar-light bg-light">
             <div className="container">
-                <a className="navbar-brand" href="#"><img src="assets/images/contact_up.png" className="img-fluid rounded-top" width="60" height="60" alt="" /></a>
+                <a className="navbar-brand" href="#"><img src={Logo} className="img-fluid rounded-top" width="60" height="60" alt="" /></a>
                 <button className="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavId" aria-controls="collapsibleNavId"
                     aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
@@ -37,13 +39,21 @@ function Navbar() {
                         >
                             <i className="fad fa-info-circle"></i> A propos
                         </NavLink>
-                        <li className="nav-item">
-                            <a className="nav-link" href="#"><i className="fad fa-cog"></i> Paramètres</a>
-                        </li>
+                        <NavLink
+                            className="nav-link"
+                            to="/settings"
+                        >
+                            <i className="fad fa-cog"></i> Paramètres
+                        </NavLink>
                     </ul>
                     <form className="d-flex my-2 my-lg-0">
                         {/* <input className="form-control me-sm-2" type="text" placeholder="Search" /> */}
-                        <button className="btn btn-outline-success my-2 my-sm-0"><i class="fas fa-plus fa-lg"></i> </button>
+                        <NavLink
+                            className="nav-link"
+                            to="/addContact"
+                        >
+                        <button className="btn btn-link text-dark my-2 my-sm-0"><i className="fas fa-plus fa-lg"></i> </button>
+                        </NavLink>
                     </form>
                 </div>
             </div>

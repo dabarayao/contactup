@@ -24,6 +24,6 @@
     <body class="dx-viewport">
 
         <div id="main"></div>
-        <script src="js/app.js"></script>
+        <script src="{{asset("js/app.js")}}"></script>
     </body>
 </html>
