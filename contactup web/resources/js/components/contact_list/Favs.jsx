@@ -96,10 +96,14 @@ class Favs extends Component {
             ).then(function (response) {
                 if (response.status == 200 || response.status == 201) {
                     Swal.fire({
-                        title: 'Contact Up !',
-                        text: 'Contact archivé avec succès 😃.',
-                        icon: 'success',
-                        confirmButtonText: 'Ok'
+                        title: '<span style="color: white; font-weight: bold;">Contact archivé avec succès</span>',
+                        icon: "success",
+                        iconColor: 'white',
+                        toast: true,
+                        timer: 4000,
+                        position: 'top-right',
+                        background: '#4BB543',
+                       showConfirmButton: false
                     });
                 }
             });
