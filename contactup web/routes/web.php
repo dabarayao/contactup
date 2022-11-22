@@ -15,11 +15,28 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::get('/{path?}', function () {
-    return view('view');
-})->where('path', '.*');
-
-
+// The list of the react's routes
+Route::get('/', function () {
+    return view('home');
+});
+Route::get('/favs', function () {
+    return view('home');
+});
+Route::get('/archs', function () {
+    return view('home');
+});
+Route::get('/about', function () {
+    return view('home');
+});
+Route::get('/settings', function () {
+    return view('home');
+});
+Route::get('/addContact', function () {
+    return view('home');
+});
+Route::get('/edit/{conId}', function () {
+    return view('home');
+});
 
 
 // The list of the mobile route
@@ -29,6 +46,7 @@ Route::get('/contact/list/favs', [App\Http\Controllers\contactController::class,
 Route::get('/contact/list/archs', [App\Http\Controllers\contactController::class, "indexArch"])->name("homeArch");
 
 Route::post('/contact', [App\Http\Controllers\contactController::class, "store"]);
+Route::post('/contact/theme', [App\Http\Controllers\contactController::class, "theme"]);
 Route::post('/contact/edit/{contact}', [App\Http\Controllers\contactController::class, "update"]);
 Route::post('/contact/edit/fav/{contact}', [App\Http\Controllers\contactController::class, "favorite"]);
 Route::post('/contact/edit/arch/{contact}', [App\Http\Controllers\contactController::class, "archive"]);

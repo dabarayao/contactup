@@ -55,7 +55,7 @@ class Home extends Component {
             }
         });
 
-        this.setState({ contacts: resPattern});
+        this.setState({ contacts: response.data});
     }
 
     updateFav = async (contactId, is_fav) => {

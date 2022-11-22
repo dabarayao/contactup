@@ -12,7 +12,7 @@
     integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
 
       <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/22.1.6/css/dx.common.css" />
-      <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/22.1.6/css/dx.light.css" />
+      <link rel="stylesheet" type="text/css" @if(session()->has('theme')) @if(session()->get('theme') == 0) href="https://cdn3.devexpress.com/jslib/22.1.6/css/dx.light.css" @else href="https://cdn3.devexpress.com/jslib/22.1.6/css/dx.dark.css" @endif @else href="https://cdn3.devexpress.com/jslib/22.1.6/css/dx.light.css" @endif />
 
 
         <style>

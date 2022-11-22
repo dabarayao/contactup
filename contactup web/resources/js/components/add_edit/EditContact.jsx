@@ -74,7 +74,6 @@ const img = {
 
 function EditContact() {
     const [contactList, setContactList] = useState(null);
-    const [files, setFiles] = useState([]);
 
 
     const navigate = useNavigate();
@@ -82,6 +81,7 @@ function EditContact() {
 
 
     function Previews(props) {
+        const [files, setFiles] = useState([]);
         const {getRootProps, getInputProps} = useDropzone({
             accept: {
             'image/*': []
@@ -118,40 +118,10 @@ function EditContact() {
 
 
 
-
-
-
-
     useEffect(() => {
         // Make sure to revoke the data uris to avoid memory leaks, will run on unmount
         return () => files.forEach(file => URL.revokeObjectURL(file.preview));
     }, []);
-
-    return (
-        <section className="container">
-            { files.length == 0 &&
-                <div {...getRootProps({className: 'dropzone'})}>
-                    <input {...getInputProps()} />
-                    Ajouter une photo
-                </div>
-            }
-            {
-                files.length > 0  &&
-                <>
-                <aside style={thumbsContainer} className="justify-content-center">
-                        {thumbs}
-
-                        <button type="button" onClick={() => {
-                            setFiles([]);
-                            formData.append('delImage', 1);
-                        }} className="btn btn-link text-danger"><i className="fas fa-times fa-lg"></i></button>
-                    </aside>
-                </>
-
-            }
-        </section>
-    );
-    }
 
     const fetchData = async () => {
         const response = await axios.get(`http://localhost:8000/contact/show/${conId}`);
@@ -180,6 +150,35 @@ function EditContact() {
     useEffect(function () {
         fetchData();
     }, []);
+
+    return (
+        <section className="container">
+            { files.length == 0 &&
+                <div {...getRootProps({className: 'dropzone'})}>
+                    <input {...getInputProps()} />
+                    Ajouter une photo
+                </div>
+            }
+            {
+                files.length > 0  &&
+                <>
+                <aside style={thumbsContainer} className="justify-content-center">
+                        {thumbs}
+
+                        <button type="button" onClick={() => {
+                            setFiles([]);
+                            formData.append('delImage', 1);
+                        }} className="btn btn-link text-danger"><i className="fas fa-times fa-lg"></i></button>
+                    </aside>
+                </>
+
+            }
+        </section>
+    );
+
+
+    }
+
 
 
 

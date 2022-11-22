@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\contact;
 use App\Http\Requests\StorecontactRequest;
 use App\Http\Requests\UpdatecontactRequest;
-use GuzzleHttp\Psr7\Request;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -22,6 +22,14 @@ class ContactController extends Controller
         $contact = contact::orderBy('created_at', 'DESC')->where("is_arch", false)->get();
 
         return json_encode($contact, JSON_UNESCAPED_SLASHES);
+    }
+
+    public function theme(Request $request)
+    {
+        //
+        session()->put("theme", $request->appTheme);
+
+        return "ok";
     }
 
     public function indexFav()
