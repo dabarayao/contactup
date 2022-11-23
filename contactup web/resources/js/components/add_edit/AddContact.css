@@ -1,6 +1,7 @@
 .submitButton .dx-button
 {
     background: #f2b538 !important;
+    color: #333 !important;
     border: none;
 }
 

@@ -16,9 +16,10 @@ import axios from 'axios';
 import service from '../data.js';
 
 import Navbar from '../layout/Navbar';
+import Footer from '../layout/Footer';
 
 
-
+var langui = localStorage.getItem("language");
 
 class Archs extends Component {
   constructor(props) {
@@ -164,7 +165,7 @@ class Archs extends Component {
             <div className="container">
                 <br />
                 <nav className="breadcrumb">
-                    <a className="breadcrumb-item" href="#"><i className="fas fa-home"></i>Accueil</a>
+                    <a className="breadcrumb-item" style={{textDecoration: "none"}} href="#"><i className="fas fa-home"></i>{ langui == 1 ? " Home" :  " Accueil"}</a>
                     <span className="breadcrumb-item active" aria-current="page">Liste des archives</span>
                 </nav>
             </div>
@@ -188,8 +189,8 @@ class Archs extends Component {
                                 <p>Email: {this.state.detailEmail}</p>
                                 <p>Téléphone: {this.state.detailPhone}</p>
                                 <p>
-                                    <button type="button" className="btn btn-light" onClick={() => this.updateArch(this.state.detailId, true)} data-bs-toggle="tooltip" title="Restaurer"><i className="fal fa-box-open fa-2x"></i></button>
-                                    <button type="button" className="btn btn-light text-danger" onClick={() => this.deleteContact(this.state.detailId)}  data-bs-toggle="tooltip" title="Supprimer"><i className="fas fa-trash-alt fa-lg"></i></button>
+                                    <button type="button" className="btn btn-link" style={{color: "#337ab7"}} onClick={() => this.updateArch(this.state.detailId, true)} data-bs-toggle="tooltip" title="Restaurer"><i className="fal fa-box-open fa-2x"></i></button>
+                                    <button type="button" className="btn btn-link text-danger" onClick={() => this.deleteContact(this.state.detailId)}  data-bs-toggle="tooltip" title="Supprimer"><i className="fas fa-trash-alt fa-lg"></i></button>
 
                                 </p>
 
@@ -215,7 +216,7 @@ class Archs extends Component {
                 >
                 <SearchPanel visible={true}
                     width={240}
-                        placeholder="Recherche..." />
+                    placeholder={ langui == 1 ? "Search..." :  "Recherche..."} />
                 <Selection mode="single" />
                 <Scrolling rowRenderingMode='virtual'></Scrolling>
                 <Paging defaultPageSize={5} />
@@ -231,16 +232,19 @@ class Archs extends Component {
                     caption="Photo">
                 </Column>
                     <Column dataField="nom"
-                caption="Nom">
+                caption={ langui == 1 ? "Last name" :  "Nom"}>
                 </Column>
                 <Column dataField="prenoms"
-                    alignment="right">
+                    alignment="right"
+                    caption={ langui == 1 ? "First name" :  "Prénoms"}>
                 </Column>
                 <Column dataField="email"
                     alignment="right"
-                    dataType="email"/>
+                    dataType="email"
+                    />
                 <Column dataField="phone"
-                    alignment="right">
+                    alignment="right"
+                    caption={ langui == 1 ? "Phone" :  "Téléphone"}>
                 </Column>
                 <Column dataField="is_fav"
                     visible={false}
@@ -253,6 +257,7 @@ class Archs extends Component {
                 </DataGrid>
             </div>
 
+            <Footer />
       </div>
     );
   }

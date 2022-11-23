@@ -169,8 +169,8 @@ Future<void> updateFav(favId, favorite) async {
 
 // A future to get all the contacts
 Future<List<Contact>> fetchContacts(http.Client client, context, lang) async {
-  final response =
-      await client.get(Uri.parse('http://10.0.2.2:8000/contact/list'), headers: {
+  final response = await client
+      .get(Uri.parse('http://10.0.2.2:8000/contact/list'), headers: {
     HttpHeaders.contentTypeHeader: "application/json",
     "Connection": "Keep-Alive",
     "Keep-Alive": "timeout=2, max=1000"
@@ -611,7 +611,10 @@ class ContactsItems extends HookWidget {
                     selectedColor: _darkTheme ? Colors.white : Colors.black,
                     selectedTileColor: const Color(0xFFF2B538).withOpacity(0.3),
                     leading: CachedNetworkImage(
-                      imageUrl: "http://10.0.2.2:8000${contacts[index].photo}",
+                      imageUrl: contacts[index].photo == "aucun"
+                          ? ("https://placehold.co/300x300/f2b538/000000.png?text=${contacts[index].nom[0]}${contacts[index].prenoms[0]}"
+                              "")
+                          : "http://10.0.2.2:8000${contacts[index].photo}",
                       placeholder: (context, url) =>
                           CircularProgressIndicator(),
                       errorWidget: (context, url, error) => Icon(
@@ -621,7 +624,7 @@ class ContactsItems extends HookWidget {
                       ),
                     ),
                     title: Text(
-                      "${StringUtils.capitalize(contacts[index].prenoms)} ${StringUtils.capitalize(contacts[index].nom)}",
+                      "${StringUtils.capitalize(contacts[index].nom)} ${StringUtils.capitalize(contacts[index].prenoms)}",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -792,8 +795,10 @@ class ContactsItems extends HookWidget {
                       },
                       textColor: _darkTheme ? Colors.white : null,
                       leading: CachedNetworkImage(
-                        imageUrl:
-                            "http://10.0.2.2:8000${contacts[index].photo}",
+                        imageUrl: contacts[index].photo == "aucun"
+                            ? ("https://placehold.co/300x300/f2b538/000000.png?text=${contacts[index].nom[0]}${contacts[index].prenoms[0]}"
+                                "")
+                            : "http://10.0.2.2:8000${contacts[index].photo}",
                         placeholder: (context, url) =>
                             CircularProgressIndicator(),
                         errorWidget: (context, url, error) => Icon(
@@ -803,7 +808,7 @@ class ContactsItems extends HookWidget {
                         ),
                       ),
                       title: Text(
-                        "${StringUtils.capitalize(contacts[index].prenoms)} ${StringUtils.capitalize(contacts[index].nom)}",
+                        "${StringUtils.capitalize(contacts[index].nom)} ${StringUtils.capitalize(contacts[index].prenoms)}",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

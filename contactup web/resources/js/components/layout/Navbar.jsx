@@ -4,10 +4,14 @@ import { NavLink } from "react-router-dom";
 import Logo from '../../img/contact_up.png';
 
 
+var langui = localStorage.getItem("language");
+var theme = localStorage.getItem("theme");
+
+
 function Navbar() {
     return (
-        <nav className="navbar navbar-expand-sm navbar-light bg-light">
-            <div className="container">
+        <nav className={theme == 1 ? "navbar navbar-expand-sm navbar-dark bg-dark" : "navbar navbar-expand-sm navbar-light bg-light" } >
+            <div className="container" style={{fontSize: "16px"}}>
                 <a className="navbar-brand" href="#"><img src={Logo} className="img-fluid rounded-top" width="60" height="60" alt="" /></a>
                 <button className="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavId" aria-controls="collapsibleNavId"
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -19,13 +23,13 @@ function Navbar() {
                             className="nav-link"
                             to="/"
                         >
-                            <i className="fad fa-home"></i> Accueil
+                            <i className="fad fa-home"></i> { langui == 1 ? "Home" :  "Accueil"}
                         </NavLink>
                         <NavLink
                             className="nav-link"
                             to="/favs"
                         >
-                            <i className="fad fa-stars"></i> Mes favoris
+                            <i className="fad fa-stars"></i> { langui == 1 ? "My favorites" :  "Mes favoris"}
                         </NavLink>
                         <NavLink
                             className="nav-link"
@@ -37,13 +41,13 @@ function Navbar() {
                             className="nav-link"
                             to="/about"
                         >
-                            <i className="fad fa-info-circle"></i> A propos
+                            <i className="fad fa-info-circle"></i> { langui == 1 ? "About" :  "A propos"}
                         </NavLink>
                         <NavLink
                             className="nav-link"
                             to="/settings"
                         >
-                            <i className="fad fa-cog"></i> Paramètres
+                            <i className="fad fa-cog"></i> { langui == 1 ? "Settings" :  "Paramètres"}
                         </NavLink>
                     </ul>
                     <form className="d-flex my-2 my-lg-0">
@@ -52,7 +56,7 @@ function Navbar() {
                             className="nav-link"
                             to="/addContact"
                         >
-                        <button className="btn btn-link text-dark my-2 my-sm-0"><i className="fas fa-plus fa-lg"></i> </button>
+                            <button className="btn btn-link  my-2 my-sm-0">{theme == 1 ? <i className="fas fa-plus text-light fa-lg"></i> : <i className="fas fa-plus text-dark fa-lg"></i>  } </button>
                         </NavLink>
                     </form>
                 </div>

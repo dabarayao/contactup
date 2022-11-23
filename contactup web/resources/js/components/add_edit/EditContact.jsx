@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 
 
 import Navbar from '../layout/Navbar';
+import Footer from '../layout/Footer';
 import Form, {
   ButtonItem,
   GroupItem,
@@ -25,8 +26,8 @@ import axios from 'axios';
 
 import "./AddContact.css";
 
+var langui = localStorage.getItem("language");
 var formData = new FormData();
-
 
 const contacts = {
   Nom: '',
@@ -156,7 +157,7 @@ function EditContact() {
             { files.length == 0 &&
                 <div {...getRootProps({className: 'dropzone'})}>
                     <input {...getInputProps()} />
-                    Ajouter une photo
+                    { langui == 1 ? "Add a photo" :  "Ajouter une photo"}
                 </div>
             }
             {
@@ -232,13 +233,13 @@ function EditContact() {
             <div className="container">
                 <br />
                 <nav className="breadcrumb">
-                    <a className="breadcrumb-item" href="#"><i className="fas fa-home"></i> Accueil</a>
+                    <a className="breadcrumb-item" style={{textDecoration: "none"}} href="#"><i className="fas fa-home"></i> { langui == 1 ? " Home" :  " Accueil"}</a>
                     <span className="breadcrumb-item active" aria-current="page">Modifier</span>
                 </nav>
             </div>
 
             <div className="container">
-                <h1>Modifier un contact</h1>
+                <h1>{ langui == 1 ? "Edit a contact" :  "Modifier un contact"}</h1>
             </div>
 
             <div className="container">
@@ -272,6 +273,7 @@ function EditContact() {
                         <div className="col-6">
 
                             <Previews />
+                            <br />
 
                             {contactList != null ?
 
@@ -282,40 +284,39 @@ function EditContact() {
                                     showValidationSummary={true}
                                     validationGroup="customerData"
                                 >
-                                    <GroupItem caption="Modifier un contact">
-                                        <SimpleItem dataField="Nom" editorType="dxTextBox">
-                                            <Label text="Nom" />
-                                            <RequiredRule message="Le champ nom est requis" />
-                                            <AsyncRule
-                                                message="Le nom n'est pas valide"
-                                                validationCallback={asyncValidation} />
-                                        </SimpleItem>
 
-                                        <SimpleItem dataField="Prenoms" editorType="dxTextBox">
-                                            <Label text="Prénoms" />
-                                            <RequiredRule message="Le champ prénoms est requis" />
-                                            <AsyncRule
-                                                message="Les prénoms de sont pas valides"
-                                                validationCallback={asyncValidation} />
-                                        </SimpleItem>
+                                       <SimpleItem dataField="Nom" editorType="dxTextBox">
+                                        <Label text={ langui == 1 ? "Last name" :  "Nom"} />
+                                        <RequiredRule message={ langui == 1 ? "Field is required" :  "Le champ nom est requis"}  />
+                                        <AsyncRule
+                                        message={langui == 1 ? "Last name isn't valid" : "Le nom n'est pas valide"}
+                                        validationCallback={asyncValidation} />
+                                    </SimpleItem>
+
+                                    <SimpleItem dataField="Prenoms" editorType="dxTextBox">
+                                        <Label text={ langui == 1 ? "First name" :  "Prénoms"} />
+                                        <RequiredRule message={ langui == 1 ? "Field is required" :  "Le champ prénoms est requis"}  />
+                                        <AsyncRule
+                                        message={langui == 1 ? "First name isn't valid" : "Le prénoms n'est pas valide"}
+                                        validationCallback={asyncValidation} />
+                                    </SimpleItem>
 
 
-                                        <SimpleItem dataField="Phone" editorType="dxTextBox">
-                                            <Label text="Téléphone" />
-                                            <RequiredRule message="Le champ téléphone est requis" />
-                                            <AsyncRule
-                                                message="Le champ téléphone est requis"
-                                                validationCallback={asyncValidation} />
-                                        </SimpleItem>
+                                    <SimpleItem dataField="Phone" editorType="dxTextBox">
+                                        <Label text={ langui == 1 ? "Phone" :  "Téléphone"} />
+                                        <RequiredRule message={ langui == 1 ? "Phone is required" :  "Le champ téléphone est requis"}  />
+                                        <AsyncRule
+                                        message={langui == 1 ? "Phone isn't valid" : "Le téléphone n'est pas valide"}
+                                        validationCallback={asyncValidation} />
+                                    </SimpleItem>
 
-                                        <SimpleItem dataField="Email" editorType="dxTextBox">
-                                            <RequiredRule message="le champ email est requis" />
-                                            <EmailRule message="L'email est invalid" />
-                                            <AsyncRule
-                                                message="Le champ email est requis"
-                                                validationCallback={asyncValidation} />
-                                        </SimpleItem>
-                                    </GroupItem>
+                                    <SimpleItem dataField="Email" editorType="dxTextBox">
+                                        <RequiredRule message={ langui == 1 ? "Email field is required" :  "le champ email est requis"} />
+                                    <EmailRule message={langui == 1 ? "Email is invalid" : "L'email est invalid"} />
+                                        <AsyncRule
+                                        message={langui == 1 ? "Email field is required" : "Le champ email est requis"}
+                                        validationCallback={asyncValidation} />
+                                    </SimpleItem>
 
                                     <ButtonItem cssClass="submitButton" horizontalAlignment="left"
                                         buttonOptions={buttonOptions}
@@ -330,6 +331,7 @@ function EditContact() {
 
             </div>
 
+            <Footer />
         </div>
     );
 }

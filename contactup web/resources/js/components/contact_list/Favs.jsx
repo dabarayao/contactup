@@ -18,9 +18,10 @@ import axios from 'axios';
 import service from '../data.js';
 
 import Navbar from '../layout/Navbar';
+import Footer from '../layout/Footer';
 
 
-
+var langui = localStorage.getItem("language");
 
 class Favs extends Component {
   constructor(props) {
@@ -190,7 +191,7 @@ class Favs extends Component {
             <div className="container">
                 <br />
                 <nav className="breadcrumb">
-                    <a className="breadcrumb-item" href="#"><i className="fas fa-home"></i>Accueil</a>
+                    <a className="breadcrumb-item" style={{textDecoration: "none"}} href="#"><i className="fas fa-home"></i>{ langui == 1 ? " Home" :  " Accueil"}</a>
                     <span className="breadcrumb-item active" aria-current="page">Liste des favoris</span>
                 </nav>
             </div>
@@ -214,14 +215,14 @@ class Favs extends Component {
                                 <p>Email: {this.state.detailEmail}</p>
                                 <p>Téléphone: {this.state.detailPhone}</p>
                                 <p>
-                                    {this.state.detailFav == true ? <button type="button" className="btn btn-light" onClick={() => this.updateFav(this.state.detailId, true)} data-bs-toggle="tooltip" title="Retirer des favoris"><i className="fas fa-star fa-lg" style={{ color: "#f2b538", }}></i></button> : <button type="button" className="btn btn-light" onClick={() => this.updateFav(this.state.detailId, false)}  data-bs-toggle="tooltip" title="Ajouter au favoris"><i className="fal fa-star fa-lg"></i></button>}
+                                    {this.state.detailFav == true ? <button type="button" className="btn btn-link" onClick={() => this.updateFav(this.state.detailId, true)} data-bs-toggle="tooltip" title="Retirer des favoris"><i className="fas fa-star fa-lg" style={{ color: "#f2b538", }}></i></button> : <button type="button" className="btn btn-link" style={{color: "#337ab7"}} onClick={() => this.updateFav(this.state.detailId, false)}  data-bs-toggle="tooltip" title="Ajouter au favoris"><i className="fal fa-star fa-lg"></i></button>}
                                     <Link to={"/edit/" + this.state.detailId} >
-                                      <button type="button" className="btn btn-light" data-bs-toggle="tooltip" title="Modifier le contact"><i className="fal fa-pen fa-lg"></i></button>
+                                      <button type="button" className="btn btn-link" style={{color: "#337ab7"}} data-bs-toggle="tooltip" title="Modifier le contact"><i className="fal fa-pen fa-lg"></i></button>
                                     </Link>
                                 </p>
                                 <p>
-                                    <button type="button" className="btn btn-light" onClick={() => this.updateArch(this.state.detailId, false)} data-bs-toggle="tooltip" title="Archiver"><i className="fal fa-archive fa-lg"></i></button>
-                                    <button type="button" className="btn btn-light text-danger" onClick={() => this.deleteContact(this.state.detailId)}  data-bs-toggle="tooltip" title="Supprimer"><i className="fas fa-trash-alt fa-lg"></i></button>
+                                    <button type="button" className="btn btn-link" style={{color: "#337ab7"}} onClick={() => this.updateArch(this.state.detailId, false)} data-bs-toggle="tooltip" title="Archiver"><i className="fal fa-archive fa-lg"></i></button>
+                                    <button type="button" className="btn btn-link text-danger" onClick={() => this.deleteContact(this.state.detailId)}  data-bs-toggle="tooltip" title="Supprimer"><i className="fas fa-trash-alt fa-lg"></i></button>
                                 </p>
 
                           </div>
@@ -246,7 +247,7 @@ class Favs extends Component {
                 >
                 <SearchPanel visible={true}
                     width={240}
-                        placeholder="Recherche..." />
+                    placeholder={ langui == 1 ? "Search..." :  "Recherche..."} />
                 <Selection mode="single" />
                 <Scrolling rowRenderingMode='virtual'></Scrolling>
                 <Paging defaultPageSize={5} />
@@ -261,17 +262,20 @@ class Favs extends Component {
                         cellRender={this.renderGridCell}
                     caption="Photo">
                 </Column>
-                    <Column dataField="nom"
-                caption="Nom">
+                  <Column dataField="nom"
+                caption={ langui == 1 ? "Last name" :  "Nom"}>
                 </Column>
                 <Column dataField="prenoms"
-                    alignment="right">
+                    alignment="right"
+                    caption={ langui == 1 ? "First name" :  "Prénoms"}>
                 </Column>
                 <Column dataField="email"
                     alignment="right"
-                    dataType="email"/>
+                    dataType="email"
+                    />
                 <Column dataField="phone"
-                    alignment="right">
+                    alignment="right"
+                    caption={ langui == 1 ? "Phone" :  "Téléphone"}>
                 </Column>
                 <Column dataField="is_fav"
                     visible={false}
@@ -284,6 +288,7 @@ class Favs extends Component {
                 </DataGrid>
             </div>
 
+            <Footer />
       </div>
     );
   }
