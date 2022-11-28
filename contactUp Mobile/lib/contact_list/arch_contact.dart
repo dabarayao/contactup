@@ -32,6 +32,7 @@ import 'package:flutter/material.dart'
         RefreshIndicator,
         Scaffold,
         ScaffoldMessenger,
+        SingleChildScrollView,
         SnackBar,
         SnackBarAction,
         Text,
@@ -346,66 +347,74 @@ class ArchContactList extends HookWidget {
           future: loadContact,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset("pictures/no_internet.png"),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        primary: Color(0xFFF2B538),
-                        onPrimary: Color(0XFF142641)),
-                    onPressed: () {
-                      // try reloading data with internet connection
-                      context.read<LoadContactArch>().changeAllContacts(
-                          fetchArchContacts(http.Client(), context, sysLng));
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ListView(
+                      children: [
+                        Image.asset("pictures/no_internet.png"),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              primary: Color(0xFFF2B538),
+                              onPrimary: Color(0XFF142641)),
+                          onPressed: () {
+                            // try reloading data with internet connection
+                            context.read<LoadContactArch>().changeAllContacts(
+                                fetchArchContacts(
+                                    http.Client(), context, sysLng));
 
-                      // Test connectivity async Future
-                      checkInternetConnection().then((internet) {
-                        if (internet == false) {
-                          var snackBar = SnackBar(
-                            content: Text(sysLng == "fr"
-                                ? 'Vérifiez votre connexion internet'
-                                : "Check your internet connexion"),
-                            action: SnackBarAction(
-                              label: 'Ok',
-                              onPressed: () {
-                                // Some code to undo the change.
-                              },
-                            ),
-                          );
+                            // Test connectivity async Future
+                            checkInternetConnection().then((internet) {
+                              if (internet == false) {
+                                var snackBar = SnackBar(
+                                  content: Text(sysLng == "fr"
+                                      ? 'Vérifiez votre connexion internet'
+                                      : "Check your internet connexion"),
+                                  action: SnackBarAction(
+                                    label: 'Ok',
+                                    onPressed: () {
+                                      // Some code to undo the change.
+                                    },
+                                  ),
+                                );
 
 // Find the ScaffoldMessenger in the widget tree
 // and use it to show a SnackBar.
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        } else {
-                          // check if there's network to reload the data
-                          http
-                              .get(Uri.parse("http://10.0.2.2:8000"))
-                              .timeout(const Duration(seconds: 1))
-                              .catchError((e) {
-                            var snackBar = SnackBar(
-                              content: Text(sysLng == "fr"
-                                  ? 'Vérifiez votre connexion internet'
-                                  : "Check your internet connexion"),
-                              action: SnackBarAction(
-                                label: 'Ok',
-                                onPressed: () {
-                                  // Some code to undo the change.
-                                },
-                              ),
-                            );
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
+                              } else {
+                                // check if there's network to reload the data
+                                http
+                                    .get(Uri.parse("http://10.0.2.2:8000"))
+                                    .timeout(const Duration(seconds: 2))
+                                    .catchError((e) {
+                                  var snackBar = SnackBar(
+                                    content: Text(sysLng == "fr"
+                                        ? 'Vérifiez votre connexion internet'
+                                        : "Check your internet connexion"),
+                                    action: SnackBarAction(
+                                      label: 'Ok',
+                                      onPressed: () {
+                                        // Some code to undo the change.
+                                      },
+                                    ),
+                                  );
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                snackBar); // Finally, callback fires.
-                          });
-                        }
-                      });
-                    },
-                    child: Text(sysLng == "fr" ? "Actualiser" : "Refresh",
-                        style: TextStyle(fontSize: 18)),
-                  ),
-                ],
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      snackBar); // Finally, callback fires.
+                                });
+                              }
+                            });
+                          },
+                          child: Text(sysLng == "fr" ? "Actualiser" : "Refresh",
+                              style: TextStyle(fontSize: 18)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               );
             } else if (snapshot.hasData) {
               return ArchContactsItems(contacts: snapshot.data!, lang: sysLng);
