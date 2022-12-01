@@ -39,6 +39,8 @@ Route::get('/edit/{conId}', function () {
 });
 
 
+
+
 // The list of the mobile route
 Route::get('/contact/list', [App\Http\Controllers\contactController::class, "index"])->name("home");
 Route::get('/contact/show/{contact}', [App\Http\Controllers\contactController::class, "show"]);
@@ -52,3 +54,7 @@ Route::post('/contact/edit/fav/{contact}', [App\Http\Controllers\contactControll
 Route::post('/contact/edit/arch/{contact}', [App\Http\Controllers\contactController::class, "archive"]);
 Route::get('/delcontact/{contact}', [App\Http\Controllers\contactController::class, "destroyMob"]);
 Route::get('/delmulcontact/{contact}', [App\Http\Controllers\contactController::class, "destroyMulMob"]);
+
+Route::any('{catchall}', function () {
+    return view('home');
+})->where('catchall', '.*'); // 404 not found page

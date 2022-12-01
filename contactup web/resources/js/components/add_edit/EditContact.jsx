@@ -27,6 +27,7 @@ import axios from 'axios';
 import "./AddContact.css";
 
 var langui = localStorage.getItem("language");
+var theme = localStorage.getItem("theme");
 var formData = new FormData();
 
 const contacts = {

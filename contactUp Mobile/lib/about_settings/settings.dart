@@ -42,7 +42,7 @@ import 'dart:io' show File, Platform;
 
 bool _darkTheme = false; // The boolean for the dark theme of the application
 
-// // Future to share the application
+//  Future to share the application
 // Future<void> shareApp() async {
 //   final bytes = await rootBundle.load('assets/apk/contactup.apk');
 //   final list = bytes.buffer.asUint8List();

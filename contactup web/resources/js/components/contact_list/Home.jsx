@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { Link } from "react-router-dom";
 
 import 'bootstrap/dist/css/bootstrap.css';
+import noInt from '../../img/no_internet.png';
 
 
 import DataGrid, {
@@ -28,6 +29,7 @@ class Home extends Component {
         this.dataGrid = null;
         this.state = {
             contacts: "",
+            isInternet: false,
             showContactInfo: false,
             detailId: "",
             detailImage: "",
@@ -48,16 +50,21 @@ class Home extends Component {
 
 
     fetchData = async () => {
-        const response = await axios.get("http://localhost:8000/contact/list");
-        var resPattern = response.data;
+        try {
+            const response = await axios.get("http://localhost:8000/contact/list");
+            var resPattern = response.data;
 
-        resPattern.forEach((items) => {
-            if (items.photo == null) {
-                items.photo = "https://placehold.co/300x300/f2b538/000000.png?text=" + items.nom[0] + items.prenoms[0];
-            }
-        });
+            resPattern.forEach((items) => {
+                if (items.photo == null) {
+                    items.photo = "https://placehold.co/300x300/f2b538/000000.png?text=" + items.nom[0] + items.prenoms[0];
+                }
+            });
 
-        this.setState({ contacts: response.data});
+            this.setState({ contacts: response.data });
+            this.setState({ isInternet: true });
+        } catch {
+            this.setState({ isInternet: false });
+        }
     }
 
     updateFav = async (contactId, is_fav) => {
@@ -262,9 +269,12 @@ class Home extends Component {
 
 
 
-            }
+              }
 
-            <div className="container">
+
+            {
+                  this.state.isInternet == true ? (
+                      <div className="container">
                 <DataGrid id="gridContainer"
                 ref={(ref) => { this.dataGrid = ref; }}
                 dataSource={this.state.contacts}
@@ -318,6 +328,20 @@ class Home extends Component {
                 </Column>
                 </DataGrid>
             </div>
+                  ) :
+            <div className="container d-flex justify-content-center ">
+                <div className="row">
+                    <div className="col-12 text-center">
+                                  <img src={noInt} width="350" className="img-fluid rounded-top" alt="" />
+                    </div><br />
+                    <div className="col-12 text-center mt-2">
+                                  <button type="button" className="btn" onClick={() => this.fetchData()} style={{ background: "#F3C061" }}>Actualiser</button>
+                    </div>
+                </div>
+
+            </div>
+            }
+
 
             <Footer />
       </div>
