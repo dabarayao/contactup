@@ -29,7 +29,7 @@ class Home extends Component {
         this.dataGrid = null;
         this.state = {
             contacts: "",
-            isInternet: false,
+            isInternet: null,
             showContactInfo: false,
             detailId: "",
             detailImage: "",
@@ -271,76 +271,79 @@ class Home extends Component {
 
               }
 
+              {
+                  this.state.isInternet == true &&
+                  <div className="container">
+                        <DataGrid id="gridContainer"
+                        ref={(ref) => { this.dataGrid = ref; }}
+                        dataSource={this.state.contacts}
+                        keyExpr="id"
+                        showBorders={true}
+                        showColumnLines={true}
+                        showRowLines={true}
+                        rowAlternationEnabled={false}
+                        hoverStateEnabled={true}
+                        onSelectionChanged={this.onSelectionChanged}
+                        >
+                        <SearchPanel visible={true}
+                            width={240}
+                            placeholder={ langui == 1 ? "Search..." :  "Recherche..."} />
+                        <Selection mode="single" />
+                        <Scrolling rowRenderingMode='virtual'></Scrolling>
+                        <Paging defaultPageSize={5} />
+                        <Pager
+                            visible={true}
+                            allowedPageSizes={this.state.contacts.length >= 10 ? [5, 'all'] : ""}
+                            displayMode="full"
+                            showPageSizeSelector={true}
+                                showNavigationButtons={true} />
+                        <Column
+                                dataField="photo"
+                                cellRender={this.renderGridCell}
+                            caption="Photo">
+                        </Column>
+                        <Column dataField="nom"
+                        caption={ langui == 1 ? "Last name" :  "Nom"}>
+                        </Column>
+                        <Column dataField="prenoms"
+                            alignment="right"
+                            caption={ langui == 1 ? "First name" :  "Prénoms"}>
+                        </Column>
+                        <Column dataField="email"
+                            alignment="right"
+                            dataType="email"
+                            />
+                        <Column dataField="phone"
+                            alignment="right"
+                            caption={ langui == 1 ? "Phone" :  "Téléphone"}>
+                        </Column>
+                        <Column dataField="is_fav"
+                            visible={false}
+                            alignment="right">
+                        </Column>
+                        <Column dataField="is_arch"
+                            visible={false}
+                            alignment="right">
+                        </Column>
+                        </DataGrid>
+                  </div>
+              }
 
-            {
-                  this.state.isInternet == true ? (
-                      <div className="container">
-                <DataGrid id="gridContainer"
-                ref={(ref) => { this.dataGrid = ref; }}
-                dataSource={this.state.contacts}
-                keyExpr="id"
-                showBorders={true}
-                showColumnLines={true}
-                showRowLines={true}
-                rowAlternationEnabled={false}
-                hoverStateEnabled={true}
-                onSelectionChanged={this.onSelectionChanged}
-                >
-                <SearchPanel visible={true}
-                    width={240}
-                    placeholder={ langui == 1 ? "Search..." :  "Recherche..."} />
-                <Selection mode="single" />
-                <Scrolling rowRenderingMode='virtual'></Scrolling>
-                <Paging defaultPageSize={5} />
-                <Pager
-                    visible={true}
-                    allowedPageSizes={this.state.contacts.length >= 10 ? [5, 'all'] : ""}
-                    displayMode="full"
-                    showPageSizeSelector={true}
-                        showNavigationButtons={true} />
-                <Column
-                        dataField="photo"
-                        cellRender={this.renderGridCell}
-                    caption="Photo">
-                </Column>
-                <Column dataField="nom"
-                caption={ langui == 1 ? "Last name" :  "Nom"}>
-                </Column>
-                <Column dataField="prenoms"
-                    alignment="right"
-                    caption={ langui == 1 ? "First name" :  "Prénoms"}>
-                </Column>
-                <Column dataField="email"
-                    alignment="right"
-                    dataType="email"
-                    />
-                <Column dataField="phone"
-                    alignment="right"
-                    caption={ langui == 1 ? "Phone" :  "Téléphone"}>
-                </Column>
-                <Column dataField="is_fav"
-                    visible={false}
-                    alignment="right">
-                </Column>
-                <Column dataField="is_arch"
-                    visible={false}
-                    alignment="right">
-                </Column>
-                </DataGrid>
-            </div>
-                  ) :
-            <div className="container d-flex justify-content-center ">
-                <div className="row">
-                    <div className="col-12 text-center">
-                                  <img src={noInt} width="350" className="img-fluid rounded-top" alt="" />
-                    </div><br />
-                    <div className="col-12 text-center mt-2">
-                                  <button type="button" className="btn" onClick={() => this.fetchData()} style={{ background: "#F3C061" }}>Actualiser</button>
+              {
+                  this.state.isInternet == false &&
+                    <div className="container d-flex justify-content-center ">
+                        <div className="row">
+                            <div className="col-12 text-center">
+                                        <img src={noInt} width="350" className="img-fluid rounded-top" alt="" />
+                            </div><br />
+                            <div className="col-12 text-center mt-2">
+                                        <button type="button" className="btn" onClick={() => this.fetchData} style={{ background: "#F3C061" }}>Actualiser</button>
+                            </div>
+                        </div>
+
                     </div>
-                </div>
+              }
 
-            </div>
-            }
 
 
             <Footer />

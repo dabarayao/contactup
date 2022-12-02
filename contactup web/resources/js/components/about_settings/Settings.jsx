@@ -90,34 +90,30 @@ function Settings() {
                 <br />
 
                 <div className="d-flex align-items-start justify-content-center">
-                    <div className="nav flex-column nav-pills me-3 text-light" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                        <button className="nav-link active" id="v-pills-home-tab" style={themeColor}  data-bs-toggle="pill" data-bs-target="#v-pills-home" type="button" role="tab" aria-controls="v-pills-home" aria-selected="true">{ langui == 1 ? "Language" :  "Langue"}</button>
-                        <button className="nav-link" id="v-pills-profile-tab" style={themeColor} data-bs-toggle="pill" data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile" aria-selected="false">{ langui == 1 ? "Theme" :  "Thème"}</button>
-                    </div>
-                    <div className="tab-content" id="v-pills-tabContent">
-                            <div className="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
-                                <h4>{ langui == 1 ? "Choose a language" :  "Choisissez une langue"}</h4>
 
-                                <div className="mb-3">
-                                    <select defaultValue={langui == 1 ? 1 : 0} onChange={(e) => chLang(e)} className="form-select form-select-sm" style={selApp} name="" id="">
-                                        <option value="0" defaultValue>{ langui == 1 ? "French" :  "Français"}</option>
-                                        <option value="1">{ langui == 1 ? "English" :  "Anglais"}</option>
-                                    </select>
-                                </div>
+                    <ul class="list-group">
+                        <li class="list-group-item" style={selApp}>
+                            {langui == 1 ? "Language" : "Langue"} :
+                            <div className="mb-3 mt-2">
+                                <select defaultValue={langui == 1 ? 1 : 0} onChange={(e) => chLang(e)} className="form-select form-select-sm" style={selApp} name="" id="">
+                                    <option value="0" defaultValue>{ langui == 1 ? "French" :  "Français"}</option>
+                                    <option value="1">{ langui == 1 ? "English" :  "Anglais"}</option>
+                                </select>
                             </div>
-                        <div className="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
-                            <h4>Choisissez un thème  </h4>
+                        </li>
+                        <li class="list-group-item" style={selApp}>
+                            {langui == 1 ? "Theme" : "Thème"} :
+                            <div className="mb-3 mt-2">
+                                <select defaultValue={theme == 1 ? 1 : 0}  onChange={(e) => chTheme(e)} className="form-select form-select-sm" style={selApp} name="ad">
 
-                                <div className="mb-3">
-                                    <select defaultValue={theme == 1 ? 1 : 0}  onChange={(e) => chTheme(e)} className="form-select form-select-sm" style={selApp} name="ad">
-
-                                        <option  value="0">{ langui == 1 ? "Light theme" :  "Thème clair"}</option>
-                                        <option value="1">{ langui == 1 ? "Dark theme" :  "Thème foncé"}</option>
-                                    </select>
-                                </div>
-                        </div>
-                    </div>
+                                    <option  value="0">{ langui == 1 ? "Light theme" :  "Thème clair"}</option>
+                                    <option value="1">{ langui == 1 ? "Dark theme" :  "Thème foncé"}</option>
+                                </select>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
+
             </div>
 
             <Footer />

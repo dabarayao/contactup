@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.css';
-
+import noInt from '../../img/no_internet.png';
 
 import DataGrid, {
   Column, SearchPanel,
@@ -28,6 +28,7 @@ class Archs extends Component {
     this.dataGrid = null;
     this.state = {
         contacts: "",
+        isInternet: null,
         showContactInfo: false,
         detailId: "",
         detailImage: "",
@@ -46,16 +47,21 @@ class Archs extends Component {
 
 
     fetchArchData = async () => {
-        const response = await axios.get("http://localhost:8000/contact/list/archs")
-        var resPattern = response.data;
+        try {
+            const response = await axios.get("http://localhost:8000/contact/list/archs")
+            var resPattern = response.data;
 
-        resPattern.forEach((items) => {
-            if (items.photo == null) {
-                items.photo = "https://placehold.co/300x300/f2b538/000000.png?text=" + items.nom[0] + items.prenoms[0];
-            }
-        });
+            resPattern.forEach((items) => {
+                if (items.photo == null) {
+                    items.photo = "https://placehold.co/300x300/f2b538/000000.png?text=" + items.nom[0] + items.prenoms[0];
+                }
+            });
 
-         this.setState({ contacts: resPattern})
+            this.setState({ contacts: resPattern })
+            this.setState({ isInternet: true });
+        } catch {
+            this.setState({ isInternet: false });
+        }
     }
 
     updateArch = async (contactId, is_arch) => {
@@ -202,60 +208,78 @@ class Archs extends Component {
 
             }
 
-            <div className="container">
-                <DataGrid id="gridContainer"
-                ref={(ref) => { this.dataGrid = ref; }}
-                dataSource={this.state.contacts}
-                keyExpr="id"
-                showBorders={true}
-                showColumnLines={true}
-                showRowLines={true}
-                rowAlternationEnabled={false}
-                hoverStateEnabled={true}
-                onSelectionChanged={this.onSelectionChanged}
-                >
-                <SearchPanel visible={true}
-                    width={240}
-                    placeholder={ langui == 1 ? "Search..." :  "Recherche..."} />
-                <Selection mode="single" />
-                <Scrolling rowRenderingMode='virtual'></Scrolling>
-                <Paging defaultPageSize={5} />
-                <Pager
-                    visible={true}
-                    allowedPageSizes={this.state.contacts.length >= 10 ? [5, 'all'] : ""}
-                    displayMode="full"
-                    showPageSizeSelector={true}
-                        showNavigationButtons={true} />
-                <Column
-                        dataField="photo"
-                        cellRender={this.renderGridCell}
-                    caption="Photo">
-                </Column>
-                    <Column dataField="nom"
-                caption={ langui == 1 ? "Last name" :  "Nom"}>
-                </Column>
-                <Column dataField="prenoms"
-                    alignment="right"
-                    caption={ langui == 1 ? "First name" :  "Prénoms"}>
-                </Column>
-                <Column dataField="email"
-                    alignment="right"
-                    dataType="email"
-                    />
-                <Column dataField="phone"
-                    alignment="right"
-                    caption={ langui == 1 ? "Phone" :  "Téléphone"}>
-                </Column>
-                <Column dataField="is_fav"
-                    visible={false}
-                    alignment="right">
-                </Column>
-                <Column dataField="is_arch"
-                    visible={false}
-                    alignment="right">
-                </Column>
-                </DataGrid>
-            </div>
+              {
+                  this.state.isInternet == true &&
+                  <div className="container">
+                        <DataGrid id="gridContainer"
+                        ref={(ref) => { this.dataGrid = ref; }}
+                        dataSource={this.state.contacts}
+                        keyExpr="id"
+                        showBorders={true}
+                        showColumnLines={true}
+                        showRowLines={true}
+                        rowAlternationEnabled={false}
+                        hoverStateEnabled={true}
+                        onSelectionChanged={this.onSelectionChanged}
+                        >
+                        <SearchPanel visible={true}
+                            width={240}
+                            placeholder={ langui == 1 ? "Search..." :  "Recherche..."} />
+                        <Selection mode="single" />
+                        <Scrolling rowRenderingMode='virtual'></Scrolling>
+                        <Paging defaultPageSize={5} />
+                        <Pager
+                            visible={true}
+                            allowedPageSizes={this.state.contacts.length >= 10 ? [5, 'all'] : ""}
+                            displayMode="full"
+                            showPageSizeSelector={true}
+                                showNavigationButtons={true} />
+                        <Column
+                                dataField="photo"
+                                cellRender={this.renderGridCell}
+                            caption="Photo">
+                        </Column>
+                        <Column dataField="nom"
+                        caption={ langui == 1 ? "Last name" :  "Nom"}>
+                        </Column>
+                        <Column dataField="prenoms"
+                            alignment="right"
+                            caption={ langui == 1 ? "First name" :  "Prénoms"}>
+                        </Column>
+                        <Column dataField="email"
+                            alignment="right"
+                            dataType="email"
+                            />
+                        <Column dataField="phone"
+                            alignment="right"
+                            caption={ langui == 1 ? "Phone" :  "Téléphone"}>
+                        </Column>
+                        <Column dataField="is_fav"
+                            visible={false}
+                            alignment="right">
+                        </Column>
+                        <Column dataField="is_arch"
+                            visible={false}
+                            alignment="right">
+                        </Column>
+                        </DataGrid>
+                  </div>
+              }
+
+              {
+                  this.state.isInternet == false &&
+                    <div className="container d-flex justify-content-center ">
+                        <div className="row">
+                            <div className="col-12 text-center">
+                                        <img src={noInt} width="350" className="img-fluid rounded-top" alt="" />
+                            </div><br />
+                            <div className="col-12 text-center mt-2">
+                                        <button type="button" className="btn" onClick={() => this.fetchArchData} style={{ background: "#F3C061" }}>Actualiser</button>
+                            </div>
+                        </div>
+
+                    </div>
+              }
 
             <Footer />
       </div>
