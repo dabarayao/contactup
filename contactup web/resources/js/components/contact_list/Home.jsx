@@ -184,6 +184,9 @@ class Home extends Component {
 
 
     componentDidMount() {
+
+        document.title = langui == 1 ? "Contact up - Home" : "Contact up - Accueil"; // editing the title of page
+
         this.fetchData();
 
         if (localStorage.getItem("contact_add") == "ok") {

@@ -75,6 +75,7 @@ const img = {
 
 
 function EditContact() {
+    document.title = langui == 1 ? "Contact up - Edit a contact" : "Contact up - Modifier un contact"; // editing the title of page
     const [contactList, setContactList] = useState(null);
 
 

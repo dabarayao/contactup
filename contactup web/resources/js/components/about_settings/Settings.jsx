@@ -71,6 +71,7 @@ const chTheme =  async(e) => {
 }
 
 function Settings() {
+    document.title = langui == 1 ? "Contact up - Settings" : "Contact up - Paramètres"; // editing the title of page
 
     return (
         <div className="contactUp">

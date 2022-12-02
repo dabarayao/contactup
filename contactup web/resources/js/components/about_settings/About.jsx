@@ -12,6 +12,8 @@ import Logo from '../../img/contact_up.png';
 var langui = localStorage.getItem("language");
 
 function About() {
+    document.title = langui == 1 ? "Contact up - About" : "Contact up - A propos";  // editing the title of page
+
     return (
         <div className="contactUp">
 

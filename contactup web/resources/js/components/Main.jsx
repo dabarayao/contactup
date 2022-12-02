@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap/dist/css/bootstrap.css'; // importing the css of bootstrap
 import './styles.css';
 
-import Home from './contact_list/Home';
+import Home from './contact_list/Home'; // imorting the Home page
 import Favs from './contact_list/Favs';
 import Archs from './contact_list/Archs';
 import About from './about_settings/About';

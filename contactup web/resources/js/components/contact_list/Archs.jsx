@@ -158,7 +158,8 @@ class Archs extends Component {
   }
 
 
-   componentDidMount() {
+    componentDidMount() {
+        document.title = "Contact up - Archive"; // editing the title of page
         this.fetchArchData();
    }
 

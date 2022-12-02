@@ -184,7 +184,8 @@ class Favs extends Component {
   }
 
 
-   componentDidMount() {
+    componentDidMount() {
+        document.title = langui == 1 ? "Contact up - My favorites" : "Contact up - Mes favoris"; // editing the title of page
         this.fetchFavData();
    }
 

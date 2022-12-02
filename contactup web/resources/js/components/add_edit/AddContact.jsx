@@ -126,6 +126,7 @@ function Previews(props) {
 }
 
 function AddContact() {
+    document.title = langui == 1 ? "Contact up - Add a contact" : "Contact up - Ajouter un contact"; // editing the title of page
     const navigate = useNavigate();
 
 
