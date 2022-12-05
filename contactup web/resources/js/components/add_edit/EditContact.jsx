@@ -5,7 +5,7 @@ import { useDropzone } from 'react-dropzone';
 import Swal from 'sweetalert2';
 
 
-import Navbar from '../layout/Navbar';
+import Navbar from '../layout/NavbarFooter';
 import Footer from '../layout/Footer';
 import Form, {
   ButtonItem,
@@ -230,7 +230,6 @@ function EditContact() {
 
     return (
         <div className="contactUp">
-            <Navbar />
 
             <div className="container">
                 <br />
@@ -333,7 +332,7 @@ function EditContact() {
 
             </div>
 
-            <Footer />
+
         </div>
     );
 }

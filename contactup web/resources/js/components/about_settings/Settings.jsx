@@ -3,7 +3,7 @@
 import React, {useRef} from 'react';
 
 import 'bootstrap/dist/css/bootstrap.css';
-import Navbar from '../layout/Navbar';
+import Navbar from '../layout/NavbarFooter';
 import Footer from '../layout/Footer';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -76,8 +76,6 @@ function Settings() {
     return (
         <div className="contactUp">
 
-            <Navbar />
-
             <div className="container">
                 <br />
                     <nav className="breadcrumb">
@@ -117,7 +115,7 @@ function Settings() {
 
             </div>
 
-            <Footer />
+
         </div>
     );
 }

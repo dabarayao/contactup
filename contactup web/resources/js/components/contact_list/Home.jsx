@@ -16,7 +16,6 @@ import Swal from 'sweetalert2';
 
 import service from '../data.js';
 
-import Navbar from '../layout/Navbar';
 import Footer from '../layout/Footer';
 
 
@@ -227,7 +226,6 @@ class Home extends Component {
   render() {
       return (
       <div className="contactUp">
-            <Navbar />
 
             <div className="container">
                 <br />
@@ -349,7 +347,7 @@ class Home extends Component {
 
 
 
-            <Footer />
+
       </div>
     );
   }

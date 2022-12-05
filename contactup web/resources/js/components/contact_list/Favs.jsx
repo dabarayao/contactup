@@ -17,7 +17,7 @@ import axios from 'axios';
 
 import service from '../data.js';
 
-import Navbar from '../layout/Navbar';
+import Navbar from '../layout/NavbarFooter';
 import Footer from '../layout/Footer';
 
 
@@ -193,7 +193,6 @@ class Favs extends Component {
   render() {
       return (
       <div className="contactUp">
-            <Navbar />
 
             <div className="container">
                 <br />
@@ -314,7 +313,7 @@ class Favs extends Component {
               }
 
 
-            <Footer />
+
       </div>
     );
   }

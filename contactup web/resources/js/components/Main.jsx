@@ -11,8 +11,8 @@ import About from './about_settings/About';
 import AddContact from './add_edit/AddContact';
 import EditContact from './add_edit/EditContact';
 import Settings from './about_settings/Settings';
-
-
+import NavbarFooter from './layout/NavbarFooter';
+import NotFound from './errors/NotFound404';
 
 
 class Main extends Component {
@@ -26,18 +26,23 @@ class Main extends Component {
 
   render() {
       return (
-    <BrowserRouter>
-      <Routes>
-            <Route index element={<Home />} />
-            <Route path="/favs" element={<Favs />} />
-            <Route path="/archs" element={<Archs />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/addContact" element={<AddContact />} />
-            <Route path="/edit/:conId" element={<EditContact />} />
+        <BrowserRouter>
+        <Routes>
+            <Route path="/" element={<NavbarFooter />}>
+                <Route index element={<Home />} />
+                <Route path="/favs" element={<Favs />} />
+                <Route path="/archs" element={<Archs />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/addContact" element={<AddContact />} />
+                <Route path="/edit/:conId" element={<EditContact />} />
 
-      </Routes>
-    </BrowserRouter>
+                <Route path="*" element={<NotFound />} />
+            </Route>
+
+
+        </Routes>
+        </BrowserRouter>
     );
   }
 }

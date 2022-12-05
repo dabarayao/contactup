@@ -3,7 +3,7 @@
 import React from 'react';
 
 import 'bootstrap/dist/css/bootstrap.css';
-import Navbar from '../layout/Navbar';
+import Navbar from '../layout/NavbarFooter';
 import Footer from '../layout/Footer';
 
 import dabPic from '../../img/dabyao.webp';
@@ -16,8 +16,6 @@ function About() {
 
     return (
         <div className="contactUp">
-
-            <Navbar />
 
             <div className="container">
                     <br />
@@ -58,7 +56,7 @@ function About() {
 
             </div>
 
-           <Footer />
+
         </div>
     );
 }

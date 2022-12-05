@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import Swal from 'sweetalert2';
 
-import Navbar from '../layout/Navbar';
+import Navbar from '../layout/NavbarFooter';
 import Footer from '../layout/Footer';
 import Form, {
   ButtonItem,
@@ -181,7 +181,6 @@ function AddContact() {
 
     return (
         <div className="contactUp">
-            <Navbar />
 
             <div className="container">
                 <br />
@@ -280,7 +279,7 @@ function AddContact() {
 
             </div>
 
-            <Footer />
+
         </div>
     );
 }
