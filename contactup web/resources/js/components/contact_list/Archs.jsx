@@ -15,8 +15,6 @@ import axios from 'axios';
 
 import service from '../data.js';
 
-import Navbar from '../layout/NavbarFooter';
-import Footer from '../layout/Footer';
 
 
 var langui = localStorage.getItem("language");
@@ -266,6 +264,18 @@ class Archs extends Component {
                   </div>
               }
 
+                {
+                    this.state.isInternet == null &&
+                    <div className="container d-flex justify-content-center ">
+                        <div className="row">
+                <div class="loadingio-spinner-ripple-6is1l54oda9"><div class="ldio-4ojwp7ajcv7">
+                <div></div><div></div>
+                                </div></div>
+                            </div>
+                            </div>
+
+                }
+
               {
                   this.state.isInternet == false &&
                     <div className="container d-flex justify-content-center ">
@@ -274,13 +284,12 @@ class Archs extends Component {
                                         <img src={noInt} width="350" className="img-fluid rounded-top" alt="" />
                             </div><br />
                             <div className="col-12 text-center mt-2">
-                                        <button type="button" className="btn" onClick={() => this.fetchArchData} style={{ background: "#F3C061" }}>Actualiser</button>
+                                        <button type="button" className="btn" onClick={this.fetchArchData} style={{ background: "#F3C061" }}>Actualiser</button>
                             </div>
                         </div>
 
                     </div>
               }
-
 
       </div>
     );

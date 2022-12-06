@@ -3,8 +3,6 @@
 import React from 'react';
 
 import 'bootstrap/dist/css/bootstrap.css';
-import Navbar from '../layout/NavbarFooter';
-import Footer from '../layout/Footer';
 
 import dabPic from '../../img/dabyao.webp';
 import Logo from '../../img/contact_up.png';

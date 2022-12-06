@@ -1,8 +1,10 @@
 import React from 'react';
 import { NavLink, Outlet } from "react-router-dom";
-
+import "./Footer.css";
+import Footer from './Footer';
 import Logo from '../../img/contact_up.png';
-
+import noInt from '../../img/no_internet.png';
+import dabPic from '../../img/dabyao.webp';
 
 var langui = localStorage.getItem("language");
 var theme = localStorage.getItem("theme");
@@ -67,30 +69,10 @@ function Navbar() {
             </nav>
             <Outlet />
 
-            <div>
-                <div style={{marginTop: 80}}>&nbsp;</div>
-                <div className="container-fluid my-5">
-
-                    <footer className="text-center text-lg-start" style={{backgroundColor: "#4DB6BC"}}>
-                        <div className="context container d-flex justify-content-center py-2">
-                            <a role="button" href="https://twitter.com/yioxreborn2048" target="_blank" className="btn btn-lg btn-floating mx-2" style={{backgroundColor: "#F3C061", color: "#333"}}>
-                                <i className="fab fa-twitter"></i>
-                            </a>
-                            <a role="button" href="https://www.youtube.com/@yaodabara" target="_blank" className="btn btn-lg btn-floating mx-2" style={{backgroundColor: "#F3C061", color: "#333"}}>
-                                <i className="fab fa-linkedin"></i>
-                            </a>
-                            <a role="button" href="https://www.linkedin.com/in/dabarayao" target="_blank" className="btn btn-lg btn-floating mx-2" style={{backgroundColor: "#F3C061", color: "#333"}}>
-                                <i className="fab fa-youtube"></i>
-                            </a>
-                        </div>
-
-                        <div className="area text-center text-white p-1" style={{backgroundColor: "rgba(0, 0, 0, 0.2)", fontSize: "17px"}}>
-                        © 2022 Contact Up: by Yao Dabara
-                        </div>
-                    </footer>
-
-                </div>
-            </div>
+            {/*Loading the picture for the cache */}
+            <img src={noInt} width="0" />
+            <img src={dabPic} width="0" />
+            <Footer />
         </>
     );
 }

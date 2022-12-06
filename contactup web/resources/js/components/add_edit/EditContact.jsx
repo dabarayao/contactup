@@ -5,8 +5,6 @@ import { useDropzone } from 'react-dropzone';
 import Swal from 'sweetalert2';
 
 
-import Navbar from '../layout/NavbarFooter';
-import Footer from '../layout/Footer';
 import Form, {
   ButtonItem,
   GroupItem,
@@ -92,8 +90,9 @@ function EditContact() {
             multiple: false,
             onDrop: acceptedFiles => {
 
-
+            contacts.Photo = null;
             formData.append("image", acceptedFiles[0]);
+            formData.delete('delImage');
             setFiles(acceptedFiles.map(file => Object.assign(file, {
                 preview: URL.createObjectURL(file)
             })));
@@ -102,7 +101,7 @@ function EditContact() {
         });
 
         const thumbs = files.map(file => (
-           contactList.Photo == null ?
+           contacts.Photo == null ?
             <img key={file.name}
             src={file.preview}
             // Revoke data uri after image is loaded
@@ -110,7 +109,7 @@ function EditContact() {
             onLoad={() => { URL.revokeObjectURL(file.preview) }}
                 /> :
             <img key={file.name}
-            src={contactList.Photo}
+            src={contacts.Photo}
             // Revoke data uri after image is loaded
             style={img}
             onLoad={() => { URL.revokeObjectURL(file.preview) }}
