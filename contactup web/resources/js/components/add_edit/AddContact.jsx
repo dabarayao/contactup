@@ -19,13 +19,19 @@ import Form, {
 } from 'devextreme-react/form';
 
 
-import axios from 'axios';
+import axios from 'axios'; // importing the axios API
 
 import "./AddContact.css";
 
-var langui = localStorage.getItem("language");
-var formData = new FormData();
+/*
+Link of the documentation for devextreme forms components
+https://js.devexpress.com/Demos/WidgetsGallery/Demo/Common/FormsAndMultiPurposeOverview/React/Light/
+*/
 
+var langui = localStorage.getItem("language"); // get the language write on local file
+var formData = new FormData(); // the variable which catches the form data
+
+// the variable which the data of the form
 const contacts = {
   Nom: '',
   Prenoms: '',

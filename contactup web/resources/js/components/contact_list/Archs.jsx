@@ -3,18 +3,21 @@
 import React, { Component } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.css';
-import noInt from '../../img/no_internet.png';
+import noInt from '../../img/no_internet.png'; // importing nointernet vector
 
 import DataGrid, {
   Column, SearchPanel,
     Scrolling, Pager, Paging, Selection
-} from 'devextreme-react/data-grid';
+} from 'devextreme-react/data-grid'; // importing the devextreme data-grid elements
 import Swal from 'sweetalert2';
 
-import axios from 'axios';
+import axios from 'axios'; // importing the axios API
 
-import service from '../data.js';
 
+/*
+Link of the documentation for devextreme data-grid
+https://js.devexpress.com/Demos/WidgetsGallery/Demo/DataGrid/Overview/React/Light/
+*/
 
 
 var langui = localStorage.getItem("language");
@@ -22,12 +25,12 @@ var langui = localStorage.getItem("language");
 class Archs extends Component {
   constructor(props) {
       super(props);
-    this.orders = service.getOrders();
     this.dataGrid = null;
     this.state = {
         contacts: "",
-        isInternet: null,
-        showContactInfo: false,
+        isInternet: null, // state varriable to check if there's internet connection
+        showContactInfo: false, // state varriable to check of the contact info which is displayed by clicking on a table row
+        // state varriables for the display contact
         detailId: "",
         detailImage: "",
         detailNom: "",
@@ -38,8 +41,8 @@ class Archs extends Component {
         detailFav: false
     };
 
-    this.fetchArchData = this.fetchArchData.bind(this);
-    this.onSelectionChanged = this.onSelectionChanged.bind(this);
+    this.fetchArchData = this.fetchArchData.bind(this); // function to fecth the Archives' contacts on the server
+    this.onSelectionChanged = this.onSelectionChanged.bind(this); // function to chnage the displayed contact by clicking on another row
     this.renderGridCell = this.renderGridCell.bind(this);
   }
 

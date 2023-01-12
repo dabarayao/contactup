@@ -4,10 +4,10 @@ import React from 'react';
 
 import 'bootstrap/dist/css/bootstrap.css';
 
-import dabPic from '../../img/dabyao.webp';
-import Logo from '../../img/contact_up.png';
+import dabPic from '../../img/dabyao.webp';  // importing the picture of the author
+import Logo from '../../img/contact_up.png'; // importing contact up logo
 
-var langui = localStorage.getItem("language");
+var langui = localStorage.getItem("language"); // get the language write on local file
 
 function About() {
     document.title = langui == 1 ? "Contact up - About" : "Contact up - A propos";  // editing the title of page

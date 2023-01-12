@@ -2,12 +2,12 @@ import React from 'react';
 import { NavLink, Outlet } from "react-router-dom";
 import "./Footer.css";
 import Footer from './Footer';
-import Logo from '../../img/contact_up.png';
-import noInt from '../../img/no_internet.png';
-import dabPic from '../../img/dabyao.webp';
+import Logo from '../../img/contact_up.png'; // importing contact up logo
+import noInt from '../../img/no_internet.png'; // importing nointernet vector
+import dabPic from '../../img/dabyao.webp'; // importing the picture of the author
 
-var langui = localStorage.getItem("language");
-var theme = localStorage.getItem("theme");
+var langui = localStorage.getItem("language"); // get the language write on local file
+var theme = localStorage.getItem("theme"); // get the theme write on local file
 
 
 

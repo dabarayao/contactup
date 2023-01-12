@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { useDropzone } from 'react-dropzone';
+import { useNavigate, useParams } from 'react-router-dom'; // importing the useNavigate, useParams package
+import { useDropzone } from 'react-dropzone'; // importing useDropzone from the react-dropzone package
 import Swal from 'sweetalert2';
 
 
@@ -17,17 +17,24 @@ import Form, {
   RequiredRule,
   StringLengthRule,
   AsyncRule,
-} from 'devextreme-react/form';
+} from 'devextreme-react/form'; // importing the devextreme form's components
 
 
-import axios from 'axios';
+import axios from 'axios'; // importing the axios API
 
 import "./AddContact.css";
 
-var langui = localStorage.getItem("language");
-var theme = localStorage.getItem("theme");
+/*
+Link of the documentation for devextreme forms components
+https://js.devexpress.com/Demos/WidgetsGallery/Demo/Common/FormsAndMultiPurposeOverview/React/Light/
+*/
+
+var langui = localStorage.getItem("language"); // get the language write on local file
+var theme = localStorage.getItem("theme"); // get the theme write on local file
+
 var formData = new FormData();
 
+// the variable which the data of the form
 const contacts = {
   Nom: '',
   Prenoms: '',
@@ -74,10 +81,10 @@ const img = {
 
 function EditContact() {
     document.title = langui == 1 ? "Contact up - Edit a contact" : "Contact up - Modifier un contact"; // editing the title of page
-    const [contactList, setContactList] = useState(null);
+    const [contactList, setContactList] = useState(null); // hooks variable to catch the list of contacts
 
 
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // variables
     var { conId } = useParams();
 
 
@@ -125,26 +132,31 @@ function EditContact() {
         return () => files.forEach(file => URL.revokeObjectURL(file.preview));
     }, []);
 
-    const fetchData = async () => {
-        const response = await axios.get(`http://localhost:8000/contact/show/${conId}`);
+        const fetchData = async () => {
 
-                if (response.data.id == null) {
-                   navigate('/');
-        }
+            try {
+                const response = await axios.get(`http://localhost:8000/contact/show/${conId}`);
 
 
-        contacts.Nom = response.data.nom;
-        contacts.Prenoms= response.data.prenoms;
-        contacts.Phone = response.data.phone;
-        contacts.Email = response.data.email;
-        contacts.Photo = response.data.photo;
-
-        if (contacts.Photo != null) {
-            setFiles([response.data.photo]);
-        }
 
 
-        setContactList(contacts);
+
+
+                contacts.Nom = response.data.nom;
+                contacts.Prenoms = response.data.prenoms;
+                contacts.Phone = response.data.phone;
+                contacts.Email = response.data.email;
+                contacts.Photo = response.data.photo;
+
+                if (contacts.Photo != null) {
+                    setFiles([response.data.photo]);
+                }
+
+
+                setContactList(contacts);
+            } catch {
+                navigate('/');
+            }
 
 
     }

@@ -1,8 +1,8 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom'; // importing the nav link package
 import './notFound404.css';
 
-var langui = localStorage.getItem("language");
+var langui = localStorage.getItem("language"); // get the language write on local file
 
 function NotFound() {
     return (

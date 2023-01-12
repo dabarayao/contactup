@@ -1,11 +1,11 @@
 import React from 'react';
-import { NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom"; // importing the nav link package
 
-import Logo from '../../img/contact_up.png';
+import Logo from '../../img/contact_up.png'; // importing contact up logo
 import "./Footer.css";
 
-var langui = localStorage.getItem("language");
-var theme = localStorage.getItem("theme");
+var langui = localStorage.getItem("language"); // get the language write on local file
+var theme = localStorage.getItem("theme"); // get the theme write on local file
 
 
 function Footer() {

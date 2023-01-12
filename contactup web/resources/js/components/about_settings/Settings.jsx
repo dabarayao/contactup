@@ -3,29 +3,22 @@
 import React, {useRef} from 'react';
 
 import 'bootstrap/dist/css/bootstrap.css';
-import axios from 'axios';
+import axios from 'axios';  // importing the axios API
 import Swal from 'sweetalert2';
 
 import './settings.css';
 
-var themeColor = "";
-var selApp = ";"
+var selApp = ""; // a stylesheet variable
 
-var theme = localStorage.getItem("theme");
-var langui = localStorage.getItem("language");
+var theme = localStorage.getItem("theme"); // get the theme write on local file
+var langui = localStorage.getItem("language"); // get the language write on local file
 
 if (theme == 1) {
-    themeColor = {
-        color: "white"
-    }
     selApp = {
         background: "#212529",
         color: "white"
     }
 } else {
-    themeColor = {
-        color: "#333"
-    }
     selApp = {
         background: "transparent",
         color: "#333"
