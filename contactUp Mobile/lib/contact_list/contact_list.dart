@@ -41,6 +41,7 @@ import 'package:flutter/material.dart'
         TextOverflow,
         TextStyle,
         ValueKey,
+        Visibility,
         Widget,
         showDialog;
 import 'dart:convert' show jsonDecode;
@@ -276,6 +277,8 @@ class ContactList extends HookWidget {
       backgroundColor: _darkTheme ? Color(0XFF1F1F30) : null,
       appBar: DefaultAppBar(
           globalSearchValue: context.read<GlobalSearch>(),
+          reload: context.read<LoadContact>(),
+          future: fetchContacts(http.Client(), context, sysLng),
           title: "Contact Up",
           selCont: context.watch<SelectedContacts>(),
           lang: sysLng,
@@ -452,8 +455,22 @@ class ContactsItems extends HookWidget {
         .globalSearchValue; // Hooks variable which contains the search text from the serach input
 
     var selectedContacts = context.watch<SelectedContacts>().selectedContacts;
+    // contacts.retainWhere((country) =>
+    //     country.nom.toLowerCase().contains(searchText.toLowerCase()) ||
+    //     country.prenoms.toLowerCase().contains(searchText.toLowerCase()) ||
+    //     country.phone.toLowerCase().contains(searchText.toLowerCase()));
 
-    // Checking if the favorites list is not empty or not
+    if (contacts.length % 2 == 0) {
+      context
+          .read<LoadContact>()
+          .changeAllContacts(fetchContacts(http.Client(), context, lang));
+    } else {
+      context
+          .read<LoadContact>()
+          .changeAllContacts(fetchContacts(http.Client(), context, lang));
+    }
+
+    // Checking if the home list is  empty or not
     if (contacts.isNotEmpty) {
       // Checking if the search text is empty or not
       if (context.watch<GlobalSearch>().globalSearchValue == "") {
@@ -802,7 +819,7 @@ class ContactsItems extends HookWidget {
                         imageUrl: contacts[index].photo == "aucun"
                             ? ("https://placehold.co/300x300/f2b538/000000.png?text=${contacts[index].nom[0]}${contacts[index].prenoms[0]}"
                                 "")
-                            : "http://10.0.2.2:8000${contacts[index].photo}",
+                            : "${contacts[index].photo}",
                         placeholder: (context, url) =>
                             CircularProgressIndicator(),
                         errorWidget: (context, url, error) => Icon(
@@ -858,7 +875,173 @@ class ContactsItems extends HookWidget {
                             });
                           }),
                     ))
-                : Text("");
+                : Visibility(
+                    visible: false,
+                    child: Slidable(
+                        // Specify a key if the Slidable is dismissible.
+                        key: ValueKey(0),
+
+                        // The start action pane is the one at the left or the top side.
+                        startActionPane: ActionPane(
+                          // A motion is a widget used to control how the pane animates.
+                          motion: const ScrollMotion(),
+
+                          // A pane can dismiss the Slidable.
+                          dismissible: DismissiblePane(onDismissed: () {
+                            updateArch(contacts[index].id,
+                                contacts[index].isArch, context);
+                          }),
+
+                          // All actions are defined in the children parameter.
+                          children: [
+                            // A SlidableAction can have an icon and/or a label.
+                            SlidableAction(
+                              // An action can be bigger than the others.
+                              flex: 2,
+                              onPressed: (BuildContext context) => updateArch(
+                                  contacts[index].id,
+                                  contacts[index].isArch,
+                                  context),
+                              backgroundColor: Color(0xFFF2B538),
+                              foregroundColor: Colors.white,
+                              icon: Icons.archive,
+                              label: 'Archive',
+                            ),
+                          ],
+                        ),
+
+                        // The end action pane is the one at the right or the bottom side.
+                        endActionPane: ActionPane(
+                          motion: const ScrollMotion(),
+                          dismissible: DismissiblePane(onDismissed: () {
+                            updateArch(contacts[index].id,
+                                contacts[index].isArch, context);
+                          }),
+                          children: [
+                            SlidableAction(
+                              // An action can be bigger than the others.
+                              flex: 2,
+                              onPressed: (BuildContext context) => updateArch(
+                                  contacts[index].id,
+                                  contacts[index].isArch,
+                                  context),
+                              backgroundColor: Color(0xFFF2B538),
+                              foregroundColor: Colors.white,
+                              icon: Icons.archive,
+                              label: 'Archive',
+                            ),
+                          ],
+                        ),
+
+                        // The child of the Slidable is what the user sees when the
+                        // component is not dragged.
+                        child: ListTile(
+                          onTap: () {
+                            // push to viewContact route with some parameters
+                            if (selectedContacts.isNotEmpty) {
+                              if (selectedContacts
+                                  .contains(contacts[index].id)) {
+                                context
+                                    .read<SelectedContacts>()
+                                    .removeSelectedContacts(contacts[index].id);
+                              } else {
+                                context
+                                    .read<SelectedContacts>()
+                                    .newSelectedContacts(contacts[index].id);
+                              }
+                            } else {
+                              Navigator.pushNamed(context, '/viewContact',
+                                  arguments: {
+                                    'id': contacts[index].id,
+                                    'route': "home"
+                                  });
+                            }
+
+                            // Test connectivity async Future
+                            checkInternetConnection().then((internet) {
+                              if (internet == false) {
+                                context
+                                    .read<SelectedContacts>()
+                                    .emptySelectedContacts();
+                                var snackBar = SnackBar(
+                                  content: Text(lang == "fr"
+                                      ? 'Vérifiez votre connexion internet'
+                                      : "Check your internet connexion"),
+                                  action: SnackBarAction(
+                                    label: 'Ok',
+                                    onPressed: () {
+                                      // Some code to undo the change.
+                                    },
+                                  ),
+                                );
+
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
+                              }
+                            });
+                          },
+                          textColor: _darkTheme ? Colors.white : null,
+                          leading: CachedNetworkImage(
+                            imageUrl: contacts[index].photo == "aucun"
+                                ? ("https://placehold.co/300x300/f2b538/000000.png?text=${contacts[index].nom[0]}${contacts[index].prenoms[0]}"
+                                    "")
+                                : "${contacts[index].photo}",
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                            errorWidget: (context, url, error) => Icon(
+                              Icons.person,
+                              size: 48,
+                              color: _darkTheme ? Colors.blueGrey : null,
+                            ),
+                          ),
+                          title: Text(
+                            "${StringUtils.capitalize(contacts[index].nom)} ${StringUtils.capitalize(contacts[index].prenoms)}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text('${contacts[index].phone}'),
+                          trailing: IconButton(
+                              icon: Icon(
+                                contacts[index].isFav
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                color: contacts[index].isFav
+                                    ? Color(0xFFF2B538)
+                                    : _darkTheme
+                                        ? Colors.white
+                                        : _darkTheme
+                                            ? Colors.white
+                                            : Color(0XFF1F1F30),
+                              ),
+                              onPressed: () {
+                                // If there is network, the datas are saved or else an alert error is shown
+                                http
+                                    .get(Uri.parse('http://10.0.2.2:8000/'))
+                                    .timeout(const Duration(seconds: 1))
+                                    .catchError((e) {
+                                  var snackBar = SnackBar(
+                                    content: Text(lang == "fr"
+                                        ? 'Vérifiez votre connexion internet'
+                                        : "Check your internet connexion"),
+                                    action: SnackBarAction(
+                                      label: 'Ok',
+                                      onPressed: () {
+                                        // Some code to undo the change.
+                                      },
+                                    ),
+                                  );
+
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBar);
+                                }).whenComplete(() {
+                                  updateFav(contacts[index].id,
+                                      contacts[index].isFav);
+
+                                  Navigator.of(context).pushNamed('/');
+                                });
+                              }),
+                        )),
+                  );
             //return Image.network(contacts[index].photo);
           },
         );

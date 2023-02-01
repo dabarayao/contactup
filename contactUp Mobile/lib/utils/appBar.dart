@@ -128,6 +128,8 @@ class DefaultAppBar extends HookWidget implements PreferredSizeWidget {
       this.globalSearchValue,
       this.title,
       this.selCont,
+      this.reload,
+      this.future,
       this.lang,
       this.theme});
 
@@ -136,6 +138,8 @@ class DefaultAppBar extends HookWidget implements PreferredSizeWidget {
   final title;
   var lang;
   var theme;
+  var reload;
+  var future;
 
   @override
   Widget build(BuildContext context) {
