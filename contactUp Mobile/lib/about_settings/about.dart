@@ -181,15 +181,7 @@ class AboutPage extends HookWidget {
               ListTile(
                 textColor: _darkTheme ? Colors.white : null,
                 onTap: () {
-                  if (Platform.isAndroid) {
-                    // add the [https]
-                    launchUrl(
-                        Uri.parse("https://wa.me/+2250779549937/")); // new line
-                  } else {
-                    // add the [https]
-                    launchUrl(Uri.parse(
-                        "https://api.whatsapp.com/send?phone=+2250779549937")); // new line
-                  }
+                  launchUrl(Uri.parse("tel:+2250779549937"));
                 },
                 leading: const Icon(
                   Icons.info,
