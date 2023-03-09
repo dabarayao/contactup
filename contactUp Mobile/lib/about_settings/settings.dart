@@ -287,7 +287,7 @@ class _SettingPageState extends State<SettingPage> {
             ListTile(
               onTap: () {
                 Share.share(
-                    "https://drive.google.com/file/d/14PYIXEOjtdc8pdJNub8XmE1q_0d0pTrN/view?usp=share_link",
+                    "https://drive.google.com/drive/folders/1m8wF7GT0vt5qMiL-ANXgRANeU23RyApW?usp=share_link",
                     subject: sysLng == "fr"
                         ? "Contactup - Enregistrer et suivez vos contacts"
                         : "Contactup - Save and track your contacts");
