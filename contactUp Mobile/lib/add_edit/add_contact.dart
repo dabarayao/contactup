@@ -89,7 +89,7 @@ class AddContact extends HookWidget {
   Future<void> createContact(
       nom, prenoms, email, phone, upimage, context) async {
     var postUri = Uri.parse(
-        "http://10.0.2.2:8000/contact"); // this variable catches the url of the server where the contact will be saved
+        "https://contactup.dabarayao.com/contact"); // this variable catches the url of the server where the contact will be saved
 
     http.MultipartRequest request = http.MultipartRequest("POST",
         postUri); // this http mulipartrequest variable creates a post instance to the server
@@ -470,7 +470,7 @@ class AddContact extends HookWidget {
 
                     // If there is network, the datas are saved or else an alert error is shown
                     http
-                        .get(Uri.parse('http://10.0.2.2:8000/'))
+                        .get(Uri.parse('https://contactup.dabarayao.com/'))
                         .timeout(const Duration(seconds: 1))
                         .catchError((e) {
                       var snackBar = SnackBar(

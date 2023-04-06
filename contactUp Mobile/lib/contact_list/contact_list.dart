@@ -140,7 +140,7 @@ class SelectedContacts with ChangeNotifier {
 // Future to archive or unarchive contacts
 Future updateArch(archId, archive, context) async {
   var postUri = Uri.parse(
-      "http://10.0.2.2:8000/contact/edit/arch/$archId"); // this variable catches the url of the server where the contact will be saved
+      "https://contactup.dabarayao.com/contact/edit/arch/$archId"); // this variable catches the url of the server where the contact will be saved
 
   http.MultipartRequest request = http.MultipartRequest("POST",
       postUri); // this http mulipartrequest variable creates a post instance to the server
@@ -156,7 +156,7 @@ Future updateArch(archId, archive, context) async {
 // Future to make contacts favorite or not
 Future<void> updateFav(favId, favorite) async {
   var postUri = Uri.parse(
-      "http://10.0.2.2:8000/contact/edit/fav/$favId"); // this variable catches the url of the server where the contact will be saved
+      "https://contactup.dabarayao.com/contact/edit/fav/$favId"); // this variable catches the url of the server where the contact will be saved
 
   http.MultipartRequest request = http.MultipartRequest("POST",
       postUri); // this http mulipartrequest variable creates a post instance to the server
@@ -172,7 +172,7 @@ Future<void> updateFav(favId, favorite) async {
 // A future to get all the contacts
 Future<List<Contact>> fetchContacts(http.Client client, context, lang) async {
   final response = await client
-      .get(Uri.parse('http://10.0.2.2:8000/contact/list'), headers: {
+      .get(Uri.parse('https://contactup.dabarayao.com/contact/list'), headers: {
     HttpHeaders.contentTypeHeader: "application/json",
     "Connection": "Keep-Alive",
     "Keep-Alive": "timeout=2, max=1000"
@@ -664,7 +664,8 @@ class ContactsItems extends HookWidget {
                         onPressed: () {
                           // If there is network, the contact become favorite or else a snackbar error is shown
                           http
-                              .get(Uri.parse('http://10.0.2.2:8000/'))
+                              .get(
+                                  Uri.parse('https://contactup.dabarayao.com/'))
                               .timeout(const Duration(seconds: 1))
                               .catchError((e) {
                             var snackBar = SnackBar(
@@ -850,7 +851,8 @@ class ContactsItems extends HookWidget {
                           onPressed: () {
                             // If there is network, the datas are saved or else an alert error is shown
                             http
-                                .get(Uri.parse('http://10.0.2.2:8000/'))
+                                .get(Uri.parse(
+                                    'https://contactup.dabarayao.com/'))
                                 .timeout(const Duration(seconds: 1))
                                 .catchError((e) {
                               var snackBar = SnackBar(
@@ -1016,7 +1018,8 @@ class ContactsItems extends HookWidget {
                               onPressed: () {
                                 // If there is network, the datas are saved or else an alert error is shown
                                 http
-                                    .get(Uri.parse('http://10.0.2.2:8000/'))
+                                    .get(Uri.parse(
+                                        'https://contactup.dabarayao.com/'))
                                     .timeout(const Duration(seconds: 1))
                                     .catchError((e) {
                                   var snackBar = SnackBar(

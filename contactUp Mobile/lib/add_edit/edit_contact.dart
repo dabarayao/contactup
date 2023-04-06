@@ -126,7 +126,7 @@ class EditContact extends HookWidget {
     Future<void> updateContact(
         nom, prenoms, email, phone, upimage, id, context) async {
       var postUri = Uri.parse(
-          "http://10.0.2.2:8000/contact/edit/$id"); // this variable catches the url of the server where the contact will be saved
+          "https://contactup.dabarayao.com/contact/edit/$id"); // this variable catches the url of the server where the contact will be saved
 
       http.MultipartRequest request = http.MultipartRequest("POST",
           postUri); // this http mulipartrequest variable creates a post instance to the server
@@ -480,7 +480,9 @@ class EditContact extends HookWidget {
                     // If the form is valid, the create data Future to save the datas.
 
                     // If there is network, the datas are saved or else an alert error is shown
-                    http.get(Uri.parse('http://10.0.2.2:8000/')).timeout(
+                    http
+                        .get(Uri.parse('https://contactup.dabarayao.com/'))
+                        .timeout(
                       const Duration(seconds: 1),
                       onTimeout: () {
                         // Time has run out, do what you wanted to do.

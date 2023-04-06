@@ -21,7 +21,7 @@ class ContactFactory extends Factory
             'prenoms' => $prenoms,
             'email' => $this->faker->unique()->safeEmail(),
             'phone' => $this->faker->phoneNumber(), // password
-            'photo' => "https://placehold.co/300x300/f2b538/000000.png?text=" . $prenoms[0] . $nom[0]
+            'photo' => null
         ];
     }
 }

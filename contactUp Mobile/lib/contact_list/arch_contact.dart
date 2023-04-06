@@ -2,7 +2,47 @@ import 'dart:async';
 
 import 'package:contactup/contact_list/contact_list.dart';
 import 'package:flutter/material.dart'
-    show AlertDialog, AssetImage, BoxDecoration, BoxFit, BuildContext, Center, ChangeNotifier, CircularProgressIndicator, Color, Colors, Column, CrossAxisAlignment, DecorationImage, Drawer, DrawerHeader, EdgeInsets, ElevatedButton, FutureBuilder, Icon, IconButton, Icons, Image, ListTile, ListView, MainAxisAlignment, Navigator, RefreshIndicator, Scaffold, ScaffoldMessenger, SingleChildScrollView, SnackBar, SnackBarAction, Text, TextButton, TextOverflow, TextStyle, ValueKey, Visibility, Widget, showDialog;
+    show
+        AlertDialog,
+        AssetImage,
+        BoxDecoration,
+        BoxFit,
+        BuildContext,
+        Center,
+        ChangeNotifier,
+        CircularProgressIndicator,
+        Color,
+        Colors,
+        Column,
+        CrossAxisAlignment,
+        DecorationImage,
+        Drawer,
+        DrawerHeader,
+        EdgeInsets,
+        ElevatedButton,
+        FutureBuilder,
+        Icon,
+        IconButton,
+        Icons,
+        Image,
+        ListTile,
+        ListView,
+        MainAxisAlignment,
+        Navigator,
+        RefreshIndicator,
+        Scaffold,
+        ScaffoldMessenger,
+        SingleChildScrollView,
+        SnackBar,
+        SnackBarAction,
+        Text,
+        TextButton,
+        TextOverflow,
+        TextStyle,
+        ValueKey,
+        Visibility,
+        Widget,
+        showDialog;
 import 'dart:convert' show jsonDecode;
 import 'package:cached_network_image/cached_network_image.dart'
     show CachedNetworkImage; // Importing cachedNetworkImage module
@@ -69,7 +109,6 @@ class LoadContactArch with ChangeNotifier {
   }
 
   /// Makes `Counter` readable inside the devtools by listing all of its properties
-
 }
 
 // Provider for the contacts in order to load or reload them
@@ -100,7 +139,7 @@ class SelectedContactsArch with ChangeNotifier {
 // Future to archive or unarchive contacts
 Future updateArch(archId, archive) async {
   var postUri = Uri.parse(
-      "http://10.0.2.2:8000/contact/edit/arch/$archId"); // this variable catches the url of the server where the contact will be saved
+      "https://contactup.dabarayao.com/contact/edit/arch/$archId"); // this variable catches the url of the server where the contact will be saved
 
   http.MultipartRequest request = http.MultipartRequest("POST",
       postUri); // this http mulipartrequest variable creates a post instance to the server
@@ -116,7 +155,7 @@ Future updateArch(archId, archive) async {
 // Future to make contacts favorite or not
 Future<void> updateFav(favId, favorite) async {
   var postUri = Uri.parse(
-      "http://10.0.2.2:8000/contact/edit/fav/$favId"); // this variable catches the url of the server where the contact will be saved
+      "https://contactup.dabarayao.com/contact/edit/fav/$favId"); // this variable catches the url of the server where the contact will be saved
 
   http.MultipartRequest request = http.MultipartRequest("POST",
       postUri); // this http mulipartrequest variable creates a post instance to the server
@@ -132,11 +171,12 @@ Future<void> updateFav(favId, favorite) async {
 // A future to get all the contacts
 Future<List<ArchContact>> fetchArchContacts(
     http.Client client, context, lang) async {
-  final response = await client
-      .get(Uri.parse('http://10.0.2.2:8000/contact/list/archs'), headers: {
-    "Connection": "Keep-Alive",
-    "Keep-Alive": "timeout=5, max=1000"
-  }).timeout(const Duration(seconds: 2));
+  final response = await client.get(
+      Uri.parse('https://contactup.dabarayao.com/contact/list/archs'),
+      headers: {
+        "Connection": "Keep-Alive",
+        "Keep-Alive": "timeout=5, max=1000"
+      }).timeout(const Duration(seconds: 2));
 
   // Use the compute function to run parsePhotos in a separate isolate.
   return compute(parseArchContacts, response.body);
@@ -706,102 +746,106 @@ class ArchContactsItems extends HookWidget {
                       subtitle: Text('${contacts[index].phone}'),
                     ))
                 : Visibility(
-                  visible: false,
-                  child: Slidable(
-                      // Specify a key if the Slidable is dismissible.
-                      key: ValueKey(0),
-                
-                      // The start action pane is the one at the left or the top side.
-                      startActionPane: ActionPane(
-                        // A motion is a widget used to control how the pane animates.
-                        motion: const ScrollMotion(),
-                
-                        // A pane can dismiss the Slidable.
-                        dismissible: DismissiblePane(onDismissed: () {
-                          updateArch(contacts[index].id, contacts[index].isArch);
-                        }),
-                
-                        // All actions are defined in the children parameter.
-                        children: [
-                          // A SlidableAction can have an icon and/or a label.
-                          SlidableAction(
-                            // An action can be bigger than the others.
-                            flex: 2,
-                            onPressed: (BuildContext context) {
-                              updateArch(
-                                  contacts[index].id, contacts[index].isArch);
-                
-                              context.read<LoadContactArch>().changeAllContacts(
-                                  fetchArchContacts(
-                                      http.Client(), context, lang));
-                            },
-                            backgroundColor: Color(0xFFF2B538),
-                            foregroundColor: Colors.white,
-                            icon: Icons.archive,
-                            label: 'Archive',
-                          ),
-                        ],
-                      ),
-                
-                      // The end action pane is the one at the right or the bottom side.
-                      endActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        dismissible: DismissiblePane(onDismissed: () {
-                          updateArch(contacts[index].id, contacts[index].isArch);
-                        }),
-                        children: [
-                          SlidableAction(
-                            // An action can be bigger than the others.
-                            flex: 2,
-                            onPressed: (BuildContext context) {
-                              updateArch(
-                                  contacts[index].id, contacts[index].isArch);
-                
-                              context.read<LoadContactArch>().changeAllContacts(
-                                  fetchArchContacts(
-                                      http.Client(), context, lang));
-                            },
-                            backgroundColor: Color(0xFFF2B538),
-                            foregroundColor: Colors.white,
-                            icon: Icons.archive,
-                            label: 'Archive',
-                          ),
-                        ],
-                      ),
-                
-                      // The child of the Slidable is what the user sees when the
-                      // component is not dragged.
-                      child: ListTile(
-                        onTap: () {
-                          // push to viewContact route with some parameters
-                          Navigator.pushNamed(context, '/viewContact',
-                              arguments: {
-                                'id': contacts[index].id,
-                                'route': "home"
-                              });
-                        },
-                        textColor: _darkTheme ? Colors.white : null,
-                        leading: CachedNetworkImage(
-                          imageUrl: contacts[index].photo == "aucun"
-                              ? ("https://placehold.co/300x300/f2b538/000000.png?text=${contacts[index].nom[0]}${contacts[index].prenoms[0]}"
-                                  "")
-                              : "http://10.0.2.2:8000${contacts[index].photo}",
-                          placeholder: (context, url) =>
-                              CircularProgressIndicator(),
-                          errorWidget: (context, url, error) => Icon(
-                            Icons.person,
-                            size: 48,
-                            color: _darkTheme ? Colors.blueGrey : null,
-                          ),
+                    visible: false,
+                    child: Slidable(
+                        // Specify a key if the Slidable is dismissible.
+                        key: ValueKey(0),
+
+                        // The start action pane is the one at the left or the top side.
+                        startActionPane: ActionPane(
+                          // A motion is a widget used to control how the pane animates.
+                          motion: const ScrollMotion(),
+
+                          // A pane can dismiss the Slidable.
+                          dismissible: DismissiblePane(onDismissed: () {
+                            updateArch(
+                                contacts[index].id, contacts[index].isArch);
+                          }),
+
+                          // All actions are defined in the children parameter.
+                          children: [
+                            // A SlidableAction can have an icon and/or a label.
+                            SlidableAction(
+                              // An action can be bigger than the others.
+                              flex: 2,
+                              onPressed: (BuildContext context) {
+                                updateArch(
+                                    contacts[index].id, contacts[index].isArch);
+
+                                context
+                                    .read<LoadContactArch>()
+                                    .changeAllContacts(fetchArchContacts(
+                                        http.Client(), context, lang));
+                              },
+                              backgroundColor: Color(0xFFF2B538),
+                              foregroundColor: Colors.white,
+                              icon: Icons.archive,
+                              label: 'Archive',
+                            ),
+                          ],
                         ),
-                        title: Text(
-                          "${StringUtils.capitalize(contacts[index].nom)} ${StringUtils.capitalize(contacts[index].prenoms)}",
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+
+                        // The end action pane is the one at the right or the bottom side.
+                        endActionPane: ActionPane(
+                          motion: const ScrollMotion(),
+                          dismissible: DismissiblePane(onDismissed: () {
+                            updateArch(
+                                contacts[index].id, contacts[index].isArch);
+                          }),
+                          children: [
+                            SlidableAction(
+                              // An action can be bigger than the others.
+                              flex: 2,
+                              onPressed: (BuildContext context) {
+                                updateArch(
+                                    contacts[index].id, contacts[index].isArch);
+
+                                context
+                                    .read<LoadContactArch>()
+                                    .changeAllContacts(fetchArchContacts(
+                                        http.Client(), context, lang));
+                              },
+                              backgroundColor: Color(0xFFF2B538),
+                              foregroundColor: Colors.white,
+                              icon: Icons.archive,
+                              label: 'Archive',
+                            ),
+                          ],
                         ),
-                        subtitle: Text('${contacts[index].phone}'),
-                      )),
-                );
+
+                        // The child of the Slidable is what the user sees when the
+                        // component is not dragged.
+                        child: ListTile(
+                          onTap: () {
+                            // push to viewContact route with some parameters
+                            Navigator.pushNamed(context, '/viewContact',
+                                arguments: {
+                                  'id': contacts[index].id,
+                                  'route': "home"
+                                });
+                          },
+                          textColor: _darkTheme ? Colors.white : null,
+                          leading: CachedNetworkImage(
+                            imageUrl: contacts[index].photo == "aucun"
+                                ? ("https://placehold.co/300x300/f2b538/000000.png?text=${contacts[index].nom[0]}${contacts[index].prenoms[0]}"
+                                    "")
+                                : "http://10.0.2.2:8000${contacts[index].photo}",
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                            errorWidget: (context, url, error) => Icon(
+                              Icons.person,
+                              size: 48,
+                              color: _darkTheme ? Colors.blueGrey : null,
+                            ),
+                          ),
+                          title: Text(
+                            "${StringUtils.capitalize(contacts[index].nom)} ${StringUtils.capitalize(contacts[index].prenoms)}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text('${contacts[index].phone}'),
+                        )),
+                  );
             //return Image.network(contacts[index].photo);
           },
         );

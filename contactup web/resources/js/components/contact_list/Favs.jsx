@@ -38,7 +38,8 @@ class Favs extends Component {
         detailEmail: "",
         detailPhone: "",
         detailArch: false,
-        detailFav: false
+        detailFav: false,
+        isLoading: ""
     };
 
     this.fetchFavData = this.fetchFavData.bind(this); // function to fecth the Favorites' contacts on the server
@@ -51,7 +52,9 @@ class Favs extends Component {
 
     fetchFavData = async () => {
         try {
-            const response = await axios.get("http://localhost:8000/contact/list/favs");
+            const response = await axios.get("/contact/list/favs", {
+                headers: {"Access-Control-Allow-Origin": "*"}
+            });
             var resPattern = response.data;
 
             resPattern.forEach((items) => {
@@ -68,18 +71,26 @@ class Favs extends Component {
     }
 
     updateFav = async (contactId, is_fav) => {
-
+        this.setState({
+            isLoading: langui == 1 ? "...Editing" : "...Modification en cours"
+        });
         try {
-            const response = await axios.post(`http://localhost:8000/contact/edit/fav/${contactId}`,
+            const response = await axios.post(`/contact/edit/fav/${contactId}`,
                 {
                     isFav: is_fav
                 },
-                { timeout: 1000 }
+                { timeout: 15000 }
             );
 
             this.setState({ detailFav: !is_fav });
+            this.setState({
+                isLoading: ""
+            });
             this.fetchFavData();
-        } catch  {
+        } catch {
+            this.setState({
+                isLoading: ""
+            });
             Swal.fire({
                 title: 'Server error !',
                 text: 'Vérifier votre connexion internet.',
@@ -92,13 +103,15 @@ class Favs extends Component {
     }
 
     updateArch = async (contactId, is_arch) => {
-
+        this.setState({
+            isLoading: langui == 1 ? "...Archiving" : "...Archivage en cours"
+        });
         try {
-            const response = await axios.post(`http://localhost:8000/contact/edit/arch/${contactId}`,
+            const response = await axios.post(`/contact/edit/arch/${contactId}`,
                 {
                     isArch: is_arch
                 },
-                { timeout: 1000 }
+                { timeout: 15000 }
             ).then(function (response) {
                 if (response.status == 200 || response.status == 201) {
                     Swal.fire({
@@ -107,16 +120,22 @@ class Favs extends Component {
                         iconColor: 'white',
                         toast: true,
                         timer: 4000,
-                        position: 'top-right',
+                        position: 'bottom-right',
                         background: '#4BB543',
                        showConfirmButton: false
                     });
                 }
             });
 
+            this.setState({
+                isLoading: ""
+            });
             this.setState({ detailArch: !is_arch });
             this.fetchFavData();
-        } catch  {
+        } catch {
+            this.setState({
+                isLoading: ""
+            });
             Swal.fire({
                 title: 'Server error !',
                 text: 'Vérifier votre connexion internet.',
@@ -129,10 +148,14 @@ class Favs extends Component {
     }
 
     deleteContact = async (contactId) => {
-
+        this.setState({
+            isLoading: langui == 1 ? "...Deleting" : "...Suppresion en cours"
+        });
         try {
-            const response = await axios.get(`http://localhost:8000/delcontact/${contactId}`,
-                { timeout: 1000 }
+            const response = await axios.get(`/delcontact/${contactId}`, {
+                headers: {"Access-Control-Allow-Origin": "*"}
+            },
+                { timeout: 15000 }
             ).then(function (response) {
                 if (response.status == 200 || response.status == 201) {
                     Swal.fire({
@@ -141,15 +164,20 @@ class Favs extends Component {
                         iconColor: 'white',
                         toast: true,
                         timer: 4000,
-                        position: 'top-right',
+                        position: 'bottom-right',
                         background: '#4BB543',
                        showConfirmButton: false
                     });
                 }
             });
-
+            this.setState({
+                isLoading: ""
+            });
             this.fetchFavData();
-        } catch  {
+        } catch {
+            this.setState({
+                isLoading: ""
+            });
             Swal.fire({
                 title: 'Server error !',
                 text: 'Vérifier votre connexion internet.',
@@ -229,7 +257,7 @@ class Favs extends Component {
                                     <button type="button" className="btn btn-link" style={{color: "#337ab7"}} onClick={() => this.updateArch(this.state.detailId, false)} data-bs-toggle="tooltip" title="Archiver"><i className="fal fa-archive fa-lg"></i></button>
                                     <button type="button" className="btn btn-link text-danger" onClick={() => this.deleteContact(this.state.detailId)}  data-bs-toggle="tooltip" title="Supprimer"><i className="fas fa-trash-alt fa-lg"></i></button>
                                 </p>
-
+                                {`${this.state.isLoading}`}
                           </div>
                         </div>
                     </div>

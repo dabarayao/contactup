@@ -143,7 +143,7 @@ class SelectedContactsFav with ChangeNotifier {
 // Future to archive or unarchive contacts
 Future updateArch(archId, archive, context) async {
   var postUri = Uri.parse(
-      "http://10.0.2.2:8000/contact/edit/arch/$archId"); // this variable catches the url of the server where the contact will be saved
+      "https://contactup.dabarayao.com/contact/edit/arch/$archId"); // this variable catches the url of the server where the contact will be saved
 
   http.MultipartRequest request = http.MultipartRequest("POST",
       postUri); // this http mulipartrequest variable creates a post instance to the server
@@ -161,7 +161,7 @@ Future updateArch(archId, archive, context) async {
 // Future to make contacts favorite or remove from favorites
 Future<void> updateFav(favId, favorite) async {
   var postUri = Uri.parse(
-      "http://10.0.2.2:8000/contact/edit/fav/$favId"); // this variable catches the url of the server where the contact will be saved
+      "https://contactup.dabarayao.com/contact/edit/fav/$favId"); // this variable catches the url of the server where the contact will be saved
 
   http.MultipartRequest request = http.MultipartRequest("POST",
       postUri); // this http mulipartrequest variable creates a post instance to the server
@@ -177,11 +177,12 @@ Future<void> updateFav(favId, favorite) async {
 // A future to get all the favorites contacts
 Future<List<FavContact>> fetchFavContacts(
     http.Client client, context, lang) async {
-  final response = await client
-      .get(Uri.parse('http://10.0.2.2:8000/contact/list/favs'), headers: {
-    "Connection": "Keep-Alive",
-    "Keep-Alive": "timeout=5, max=1000"
-  }).timeout(const Duration(seconds: 2));
+  final response = await client.get(
+      Uri.parse('https://contactup.dabarayao.com/contact/list/favs'),
+      headers: {
+        "Connection": "Keep-Alive",
+        "Keep-Alive": "timeout=5, max=1000"
+      }).timeout(const Duration(seconds: 2));
 
   // Use the compute function to run parsePhotos in a separate isolate.
   return compute(parseFavContacts, response.body);
@@ -642,7 +643,8 @@ class FavContactsItems extends HookWidget {
                         onPressed: () {
                           // If there is network, the datas are saved or else an alert error is shown
                           http
-                              .get(Uri.parse('http://10.0.2.2:8000/'))
+                              .get(
+                                  Uri.parse('https://contactup.dabarayao.com/'))
                               .timeout(const Duration(seconds: 2))
                               .catchError((e) {
                             var snackBar = SnackBar(
@@ -792,7 +794,8 @@ class FavContactsItems extends HookWidget {
                           onPressed: () {
                             // If there is network, the datas are saved or else an alert error is shown
                             http
-                                .get(Uri.parse('http://10.0.2.2:8000/'))
+                                .get(Uri.parse(
+                                    'https://contactup.dabarayao.com/'))
                                 .timeout(const Duration(seconds: 1))
                                 .catchError((e) {
                               var snackBar = SnackBar(
@@ -920,7 +923,8 @@ class FavContactsItems extends HookWidget {
                               onPressed: () {
                                 // If there is network, the datas are saved or else an alert error is shown
                                 http
-                                    .get(Uri.parse('http://10.0.2.2:8000/'))
+                                    .get(Uri.parse(
+                                        'https://contactup.dabarayao.com/'))
                                     .timeout(const Duration(seconds: 1))
                                     .catchError((e) {
                                   var snackBar = SnackBar(

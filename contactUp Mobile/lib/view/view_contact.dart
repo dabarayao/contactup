@@ -77,7 +77,7 @@ var photoField;
 /* Future which displays the details of the contact */
 Future<Contact> fetchContact(contactId, context, route) async {
   final response = await http
-      .get(Uri.parse('http://10.0.2.2:8000/contact/show/$contactId'))
+      .get(Uri.parse('https://contactup.dabarayao.com/contact/show/$contactId'))
       .timeout(
     const Duration(seconds: 1),
     onTimeout: () {
@@ -161,7 +161,7 @@ class ViewContact extends HookWidget {
     // future to delete the contact
     Future<void> delContact(http.Client client, contactId) async {
       final response = await client.get(
-          Uri.parse('http://10.0.2.2:8000/delcontact/$contactId'),
+          Uri.parse('https://contactup.dabarayao.com/delcontact/$contactId'),
           headers: {
             "Connection": "Keep-Alive",
             "Keep-Alive": "timeout=5, max=1000"

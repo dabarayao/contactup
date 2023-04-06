@@ -54,11 +54,12 @@ Future<void> delMulContact(
     allids += "$n;";
   });
 
-  final response = await client
-      .get(Uri.parse('http://10.0.2.2:8000/delmulcontact/$allids'), headers: {
-    "Connection": "Keep-Alive",
-    "Keep-Alive": "timeout=5, max=1000"
-  });
+  final response = await client.get(
+      Uri.parse('https://contactup.dabarayao.com/delmulcontact/$allids'),
+      headers: {
+        "Connection": "Keep-Alive",
+        "Keep-Alive": "timeout=5, max=1000"
+      });
 
   if (response.body == "success") {
     var snackBar = SnackBar(
@@ -89,11 +90,12 @@ Future<void> archMulContact(
     allids += "$n;";
   });
 
-  final response = await client
-      .get(Uri.parse('http://10.0.2.2:8000/archmulcontact/$allids'), headers: {
-    "Connection": "Keep-Alive",
-    "Keep-Alive": "timeout=5, max=1000"
-  });
+  final response = await client.get(
+      Uri.parse('https://contactup.dabarayao.com/archmulcontact/$allids'),
+      headers: {
+        "Connection": "Keep-Alive",
+        "Keep-Alive": "timeout=5, max=1000"
+      });
 
   if (response.body == "success") {
     var snackBar = SnackBar(

@@ -133,6 +133,8 @@ function Previews(props) {
 function AddContact() {
     document.title = langui == 1 ? "Contact up - Add a contact" : "Contact up - Ajouter un contact"; // editing the title of page
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+
 
 
     useEffect(() => {
@@ -147,6 +149,8 @@ function AddContact() {
     const handleSubmit =  async(e) => {
 
         e.preventDefault();
+        setLoading(true);
+
         formData.append("nom", contacts.Nom);
         formData.append("prenoms", contacts.Prenoms);
         formData.append("email", contacts.Email);
@@ -154,13 +158,13 @@ function AddContact() {
 
 
          try {
-             const response = await axios.post(`http://localhost:8000/contact`,
+             const response = await axios.post(`/contact`,
                 formData,
                  {
                     headers: {
                     'Content-Type': 'multipart/form-data'
                      },
-                     timeout: 1000
+                     timeout: 15000
                  }
             ).then(function (response) {
                 if (response.status == 200 || response.status == 201) {
@@ -172,7 +176,8 @@ function AddContact() {
                 }
             });
 
-        } catch  {
+         } catch {
+            setLoading(false);
             Swal.fire({
                 title: 'Server error !',
                 text: 'Vérifier votre connexion internet.',
@@ -275,7 +280,12 @@ function AddContact() {
 
                                  <ButtonItem cssClass="submitButton" horizontalAlignment="left"
                                 buttonOptions={buttonOptions}
-                                />
+                                /> <br /> {loading == true ? <div class="d-flex align-items-center">
+                                    <div class="spinner-border text-info spinner-border"
+                                        role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div> : ""}
                             </Form>
                          </div>
 

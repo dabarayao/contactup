@@ -6,17 +6,17 @@ import Swal from 'sweetalert2';
 
 
 import Form, {
-  ButtonItem,
-  GroupItem,
-  SimpleItem,
-  Label,
-  CompareRule,
-  EmailRule,
-  PatternRule,
-  RangeRule,
-  RequiredRule,
-  StringLengthRule,
-  AsyncRule,
+    ButtonItem,
+    GroupItem,
+    SimpleItem,
+    Label,
+    CompareRule,
+    EmailRule,
+    PatternRule,
+    RangeRule,
+    RequiredRule,
+    StringLengthRule,
+    AsyncRule,
 } from 'devextreme-react/form'; // importing the devextreme form's components
 
 
@@ -36,43 +36,43 @@ var formData = new FormData();
 
 // the variable which the data of the form
 const contacts = {
-  Nom: '',
-  Prenoms: '',
-  Phone: '',
+    Nom: '',
+    Prenoms: '',
+    Phone: '',
     Email: '',
-  Photo: null,
-  Accepted: false,
+    Photo: null,
+    Accepted: false,
 };
 
- var  buttonOptions = {
-     text: 'Enregistrer',
-     useSubmitBehavior: true,
-    };
+var buttonOptions = {
+    text: 'Enregistrer',
+    useSubmitBehavior: true,
+};
 
 
 function sendRequest(value) {
-  return new Promise((resolve) => {
-      resolve(value != "");
-  });
+    return new Promise((resolve) => {
+        resolve(value != "");
+    });
 }
 
 function asyncValidation(params) {
-  return sendRequest(params.value);
+    return sendRequest(params.value);
 }
 
 const thumbsContainer = {
-  display: 'flex',
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  marginTop: 16
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 16
 };
 
 const img = {
-  display: 'block',
-  verticalAlign: 'middle',
-  width: '120px',
-  height: '120px',
-  borderRadius: '50%'
+    display: 'block',
+    verticalAlign: 'middle',
+    width: '120px',
+    height: '120px',
+    borderRadius: '50%'
 };
 
 
@@ -82,7 +82,7 @@ const img = {
 function EditContact() {
     document.title = langui == 1 ? "Contact up - Edit a contact" : "Contact up - Modifier un contact"; // editing the title of page
     const [contactList, setContactList] = useState(null); // hooks variable to catch the list of contacts
-
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate(); // variables
     var { conId } = useParams();
@@ -90,57 +90,54 @@ function EditContact() {
 
     function Previews(props) {
         const [files, setFiles] = useState([]);
-        const {getRootProps, getInputProps} = useDropzone({
+        const { getRootProps, getInputProps } = useDropzone({
             accept: {
-            'image/*': []
+                'image/*': []
             },
             multiple: false,
             onDrop: acceptedFiles => {
 
-            contacts.Photo = null;
-            formData.append("image", acceptedFiles[0]);
-            formData.delete('delImage');
-            setFiles(acceptedFiles.map(file => Object.assign(file, {
-                preview: URL.createObjectURL(file)
-            })));
+                contacts.Photo = null;
+                formData.append("image", acceptedFiles[0]);
+                formData.delete('delImage');
+                setFiles(acceptedFiles.map(file => Object.assign(file, {
+                    preview: URL.createObjectURL(file)
+                })));
 
             }
         });
 
         const thumbs = files.map(file => (
-           contacts.Photo == null ?
-            <img key={file.name}
-            src={file.preview}
-            // Revoke data uri after image is loaded
-            style={img}
-            onLoad={() => { URL.revokeObjectURL(file.preview) }}
+            contacts.Photo == null ?
+                <img key={file.name}
+                    src={file.preview}
+                    // Revoke data uri after image is loaded
+                    style={img}
+                    onLoad={() => { URL.revokeObjectURL(file.preview) }}
                 /> :
-            <img key={file.name}
-            src={contacts.Photo}
-            // Revoke data uri after image is loaded
-            style={img}
-            onLoad={() => { URL.revokeObjectURL(file.preview) }}
-            />
+                <img key={file.name}
+                    src={contacts.Photo}
+                    // Revoke data uri after image is loaded
+                    style={img}
+                    onLoad={() => { URL.revokeObjectURL(file.preview) }}
+                />
         ));
 
 
 
 
 
-    useEffect(() => {
-        // Make sure to revoke the data uris to avoid memory leaks, will run on unmount
-        return () => files.forEach(file => URL.revokeObjectURL(file.preview));
-    }, []);
+        useEffect(() => {
+            // Make sure to revoke the data uris to avoid memory leaks, will run on unmount
+            return () => files.forEach(file => URL.revokeObjectURL(file.preview));
+        }, []);
 
         const fetchData = async () => {
 
             try {
-                const response = await axios.get(`http://localhost:8000/contact/show/${conId}`);
-
-
-
-
-
+                const response = await axios.get(`/contact/show/${conId}`, {
+                    headers: {"Access-Control-Allow-Origin": "*"}
+                });
 
                 contacts.Nom = response.data.nom;
                 contacts.Prenoms = response.data.prenoms;
@@ -152,54 +149,54 @@ function EditContact() {
                     setFiles([response.data.photo]);
                 }
 
-
                 setContactList(contacts);
             } catch {
                 navigate('/');
             }
 
 
+        }
+
+        useEffect(function () {
+            fetchData();
+        }, []);
+
+        return (
+            <section className="container">
+                {files.length == 0 &&
+                    <div {...getRootProps({ className: 'dropzone' })}>
+                        <input {...getInputProps()} />
+                        {langui == 1 ? "Add a photo" : "Ajouter une photo"}
+                    </div>
+                }
+                {
+                    files.length > 0 &&
+                    <>
+                        <aside style={thumbsContainer} className="justify-content-center">
+                            {thumbs}
+
+                            <button type="button" onClick={() => {
+                                setFiles([]);
+                                formData.append('delImage', 1);
+                            }} className="btn btn-link text-danger"><i className="fas fa-times fa-lg"></i></button>
+                        </aside>
+                    </>
+
+                }
+            </section>
+        );
+
+
     }
 
-    useEffect(function () {
-        fetchData();
-    }, []);
-
-    return (
-        <section className="container">
-            { files.length == 0 &&
-                <div {...getRootProps({className: 'dropzone'})}>
-                    <input {...getInputProps()} />
-                    { langui == 1 ? "Add a photo" :  "Ajouter une photo"}
-                </div>
-            }
-            {
-                files.length > 0  &&
-                <>
-                <aside style={thumbsContainer} className="justify-content-center">
-                        {thumbs}
-
-                        <button type="button" onClick={() => {
-                            setFiles([]);
-                            formData.append('delImage', 1);
-                        }} className="btn btn-link text-danger"><i className="fas fa-times fa-lg"></i></button>
-                    </aside>
-                </>
-
-            }
-        </section>
-    );
-
-
-    }
 
 
 
 
-
-    const handleSubmit =  async(e) => {
+    const handleSubmit = async (e) => {
 
         e.preventDefault();
+        setLoading(true);
 
         formData.append("nom", contacts.Nom);
         formData.append("prenoms", contacts.Prenoms);
@@ -208,33 +205,34 @@ function EditContact() {
 
 
 
-         try {
-            const response = await axios.post(`http://localhost:8000/contact/edit/${conId}`,
+        try {
+            const response = await axios.post(`/contact/edit/${conId}`,
                 formData,
                 {
                     headers: {
-                    'Content-Type': 'multipart/form-data'
-                     },
-                     timeout: 1000
-                 }
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    timeout: 15000
+                }
             ).then(function (response) {
                 if (response.status == 200 || response.status == 201) {
 
 
-                   localStorage.setItem("contact_edit", "ok");
+                    localStorage.setItem("contact_edit", "ok");
 
-                   navigate('/');
+                    navigate('/');
                 }
             });
 
-        } catch  {
+        } catch {
+            setLoading(false);
             Swal.fire({
                 title: 'Server error !',
                 text: 'Vérifier votre connexion internet.',
                 icon: 'error',
                 confirmButtonText: 'Ok'
             });
-       }
+        }
 
     }
 
@@ -245,13 +243,13 @@ function EditContact() {
             <div className="container">
                 <br />
                 <nav className="breadcrumb">
-                    <a className="breadcrumb-item" style={{textDecoration: "none"}} href="#"><i className="fas fa-home"></i> { langui == 1 ? " Home" :  " Accueil"}</a>
+                    <a className="breadcrumb-item" style={{ textDecoration: "none" }} href="#"><i className="fas fa-home"></i> {langui == 1 ? " Home" : " Accueil"}</a>
                     <span className="breadcrumb-item active" aria-current="page">Modifier</span>
                 </nav>
             </div>
 
             <div className="container">
-                <h1>{ langui == 1 ? "Edit a contact" :  "Modifier un contact"}</h1>
+                <h1>{langui == 1 ? "Edit a contact" : "Modifier un contact"}</h1>
             </div>
 
             <div className="container">
@@ -297,46 +295,51 @@ function EditContact() {
                                     validationGroup="customerData"
                                 >
 
-                                       <SimpleItem dataField="Nom" editorType="dxTextBox">
-                                        <Label text={ langui == 1 ? "Last name" :  "Nom"} />
-                                        <RequiredRule message={ langui == 1 ? "Field is required" :  "Le champ nom est requis"}  />
+                                    <SimpleItem dataField="Nom" editorType="dxTextBox">
+                                        <Label text={langui == 1 ? "Last name" : "Nom"} />
+                                        <RequiredRule message={langui == 1 ? "Field is required" : "Le champ nom est requis"} />
                                         <AsyncRule
-                                        message={langui == 1 ? "Last name isn't valid" : "Le nom n'est pas valide"}
-                                        validationCallback={asyncValidation} />
+                                            message={langui == 1 ? "Last name isn't valid" : "Le nom n'est pas valide"}
+                                            validationCallback={asyncValidation} />
                                     </SimpleItem>
 
                                     <SimpleItem dataField="Prenoms" editorType="dxTextBox">
-                                        <Label text={ langui == 1 ? "First name" :  "Prénoms"} />
-                                        <RequiredRule message={ langui == 1 ? "Field is required" :  "Le champ prénoms est requis"}  />
+                                        <Label text={langui == 1 ? "First name" : "Prénoms"} />
+                                        <RequiredRule message={langui == 1 ? "Field is required" : "Le champ prénoms est requis"} />
                                         <AsyncRule
-                                        message={langui == 1 ? "First name isn't valid" : "Le prénoms n'est pas valide"}
-                                        validationCallback={asyncValidation} />
+                                            message={langui == 1 ? "First name isn't valid" : "Le prénoms n'est pas valide"}
+                                            validationCallback={asyncValidation} />
                                     </SimpleItem>
 
 
                                     <SimpleItem dataField="Phone" editorType="dxTextBox">
-                                        <Label text={ langui == 1 ? "Phone" :  "Téléphone"} />
-                                        <RequiredRule message={ langui == 1 ? "Phone is required" :  "Le champ téléphone est requis"}  />
+                                        <Label text={langui == 1 ? "Phone" : "Téléphone"} />
+                                        <RequiredRule message={langui == 1 ? "Phone is required" : "Le champ téléphone est requis"} />
                                         <AsyncRule
-                                        message={langui == 1 ? "Phone isn't valid" : "Le téléphone n'est pas valide"}
-                                        validationCallback={asyncValidation} />
+                                            message={langui == 1 ? "Phone isn't valid" : "Le téléphone n'est pas valide"}
+                                            validationCallback={asyncValidation} />
                                     </SimpleItem>
 
                                     <SimpleItem dataField="Email" editorType="dxTextBox">
-                                        <RequiredRule message={ langui == 1 ? "Email field is required" :  "le champ email est requis"} />
-                                    <EmailRule message={langui == 1 ? "Email is invalid" : "L'email est invalid"} />
+                                        <RequiredRule message={langui == 1 ? "Email field is required" : "le champ email est requis"} />
+                                        <EmailRule message={langui == 1 ? "Email is invalid" : "L'email est invalid"} />
                                         <AsyncRule
-                                        message={langui == 1 ? "Email field is required" : "Le champ email est requis"}
-                                        validationCallback={asyncValidation} />
+                                            message={langui == 1 ? "Email field is required" : "Le champ email est requis"}
+                                            validationCallback={asyncValidation} />
                                     </SimpleItem>
 
                                     <ButtonItem cssClass="submitButton" horizontalAlignment="left"
                                         buttonOptions={buttonOptions}
-                                    />
+                                    /> <br /> {loading == true ? <div class="d-flex align-items-center">
+                                            <div class="spinner-border text-info spinner-border"
+                                                role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div> : ""}
                                 </Form>
                                 : ""
                             }
-                         </div>
+                        </div>
 
                     </div>
                 </form>
