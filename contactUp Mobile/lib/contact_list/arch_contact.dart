@@ -172,11 +172,7 @@ Future<void> updateFav(favId, favorite) async {
 Future<List<ArchContact>> fetchArchContacts(
     http.Client client, context, lang) async {
   final response = await client.get(
-      Uri.parse('https://contactup.dabarayao.com/contact/list/archs'),
-      headers: {
-        "Connection": "Keep-Alive",
-        "Keep-Alive": "timeout=5, max=1000"
-      }).timeout(const Duration(seconds: 2));
+      Uri.parse('https://contactup.dabarayao.com/contact/list/archs'));
 
   // Use the compute function to run parsePhotos in a separate isolate.
   return compute(parseArchContacts, response.body);
@@ -219,8 +215,8 @@ class ArchContact {
       email: json['email'] as String,
       phone: json['phone'] as String,
       photo: json['photo'] ?? "aucun",
-      isFav: json['is_fav'] == 1 ? true : false,
-      isArch: json['is_arch'] == 1 ? true : false,
+      isFav: json['is_fav'] == "1" ? true : false,
+      isArch: json['is_arch'] == "1" ? true : false,
     );
   }
 }
@@ -388,7 +384,8 @@ class ArchContactList extends HookWidget {
                               } else {
                                 // check if there's network to reload the data
                                 http
-                                    .get(Uri.parse("http://10.0.2.2:8000"))
+                                    .get(Uri.parse(
+                                        "https://contactup.dabarayao.com"))
                                     .timeout(const Duration(seconds: 2))
                                     .catchError((e) {
                                   var snackBar = SnackBar(
@@ -615,7 +612,7 @@ class ArchContactsItems extends HookWidget {
                         imageUrl: contacts[index].photo == "aucun"
                             ? ("https://placehold.co/300x300/f2b538/000000.png?text=${contacts[index].nom[0]}${contacts[index].prenoms[0]}"
                                 "")
-                            : "http://10.0.2.2:8000${contacts[index].photo}",
+                            : "https://contactup.dabarayao.com${contacts[index].photo}",
                         placeholder: (context, url) =>
                             CircularProgressIndicator(),
                         errorWidget: (context, url, error) => Icon(
@@ -729,7 +726,7 @@ class ArchContactsItems extends HookWidget {
                         imageUrl: contacts[index].photo == "aucun"
                             ? ("https://placehold.co/300x300/f2b538/000000.png?text=${contacts[index].nom[0]}${contacts[index].prenoms[0]}"
                                 "")
-                            : "http://10.0.2.2:8000${contacts[index].photo}",
+                            : "https://contactup.dabarayao.com${contacts[index].photo}",
                         placeholder: (context, url) =>
                             CircularProgressIndicator(),
                         errorWidget: (context, url, error) => Icon(
@@ -829,7 +826,7 @@ class ArchContactsItems extends HookWidget {
                             imageUrl: contacts[index].photo == "aucun"
                                 ? ("https://placehold.co/300x300/f2b538/000000.png?text=${contacts[index].nom[0]}${contacts[index].prenoms[0]}"
                                     "")
-                                : "http://10.0.2.2:8000${contacts[index].photo}",
+                                : "https://contactup.dabarayao.com${contacts[index].photo}",
                             placeholder: (context, url) =>
                                 CircularProgressIndicator(),
                             errorWidget: (context, url, error) => Icon(

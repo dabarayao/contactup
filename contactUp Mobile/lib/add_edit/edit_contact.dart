@@ -1,10 +1,12 @@
 // ignore_for_file: must_be_immutable
 
+import 'package:easy_loading_button/easy_loading_button.dart';
 import 'package:flutter/material.dart'
     show
         AlertDialog,
         Align,
         Alignment,
+        AlwaysStoppedAnimation,
         AppBar,
         AutovalidateMode,
         BorderSide,
@@ -255,7 +257,7 @@ class EditContact extends HookWidget {
                   Column(
                     children: [
                       SizedBox(
-                          height: 160,
+                          height: 145,
                           child: editImage.value.path.isNotEmpty
                               ? Image.file(
                                   File(editImage.value.path),
@@ -470,10 +472,51 @@ class EditContact extends HookWidget {
             SizedBox(
               width: 200,
               height: 40,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    primary: Color(0xFFF2B538), onPrimary: Color(0XFF142641)),
-                onPressed: () {
+              child: EasyButton(
+                type: EasyButtonType.elevated,
+
+                // Content inside the button when the button state is idle.
+                idleStateWidget: Text(sysLng == "fr" ? "Modifier" : "Edit",
+                    style: TextStyle(fontSize: 18, color: Color(0XFF142641))),
+
+                // Content inside of the button when the button state is loading.
+                loadingStateWidget: const CircularProgressIndicator(
+                  strokeWidth: 3.0,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Color(0XFF142641),
+                  ),
+                ),
+
+                // Whether or not to animate the width of the button. Default is `true`.
+                // If this is set to `false`, you might want to set the `useEqualLoadingStateWidgetDimension` parameter to `true`.
+                useWidthAnimation: true,
+
+                // Whether or not to force the `loadingStateWidget` to have equal dimension. Default is `true`.
+                // This is useful when you are using `CircularProgressIndicator` as the `loadingStateWidget`.
+                // This parameter might also be useful when you set the `useWidthAnimation` parameter to `true` combined with `CircularProgressIndicator` as the value for `loadingStateWidget`.
+                useEqualLoadingStateWidgetDimension: true,
+
+                // If you want a fullwidth size, set this to double.infinity
+                width: 150.0,
+
+                height: 40.0,
+                borderRadius: 4.0,
+
+                // The elevation of the button.
+                // This will only be applied when the type parameter value is EasyButtonType.elevated
+                elevation: 0.0,
+
+                // The gap between button and it's content.
+                // This will be ignored when the `type` parameter value is set to `EasyButtonType.text`
+                contentGap: 6.0,
+
+                // Color for the button.
+                // For [EasyButtonType.elevated]: This will be the background color.
+                // For [EasyButtonType.outlined]: This will be the border color.
+                // For [EasyButtonType.text]: This will be the text color.
+                // For [EasyButtonType.outlined]: This will be the border color.
+                buttonColor: Color(0xFFF2B538),
+                onPressed: () async {
                   validMod.value = AutovalidateMode.onUserInteraction;
 
                   if (_formKey.currentState!.validate()) {
@@ -483,7 +526,7 @@ class EditContact extends HookWidget {
                     http
                         .get(Uri.parse('https://contactup.dabarayao.com/'))
                         .timeout(
-                      const Duration(seconds: 1),
+                      const Duration(seconds: 4),
                       onTimeout: () {
                         // Time has run out, do what you wanted to do.
                         showDialog<String>(
@@ -536,10 +579,12 @@ class EditContact extends HookWidget {
                             context);
                       }
                     });
+
+                    // function for the loader
+                    await Future.delayed(
+                        const Duration(milliseconds: 5000), () => 42);
                   }
                 },
-                child:
-                    const Text("Enregistrer", style: TextStyle(fontSize: 18)),
               ),
             ),
           ],

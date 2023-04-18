@@ -26,6 +26,9 @@ function Footer() {
                         <a role="button" href="https://www.linkedin.com/in/dabarayao" target="_blank" className="btn btn-lg btn-floating mx-2" style={{backgroundColor: "#F3C061", color: "#333"}}>
                             <i className="fab fa-youtube"></i>
                         </a>
+                        <a role="button" href="https://linktr.ee/dabarayao" target="_blank" className="btn btn-lg btn-floating mx-2" style={{backgroundColor: "#F3C061", color: "#333"}}>
+                            <i className="fas fa-link"></i>
+                        </a>
                     </div>
 
                     <div className="area text-center text-white p-1" style={{backgroundColor: "rgba(0, 0, 0, 0.2)", fontSize: "17px"}}>

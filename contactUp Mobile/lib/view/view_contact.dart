@@ -33,8 +33,11 @@ import 'package:flutter/material.dart'
         PopupMenuItem,
         Row,
         Scaffold,
+        ScaffoldMessenger,
         SingleChildScrollView,
         SizedBox,
+        SnackBar,
+        SnackBarAction,
         Text,
         TextAlign,
         TextButton,
@@ -61,8 +64,9 @@ import 'package:basic_utils/basic_utils.dart'
 import 'package:shared_preferences/shared_preferences.dart'
     show SharedPreferences; // Importing the shared_preferences module
 import 'dart:io' show Platform;
-import 'package:http/http.dart' as http
-    show get, Client; // Importing the http module
+import 'package:http/http.dart' as http show get, Client;
+
+import '../add_edit/add_contact.dart'; // Importing the http module
 
 bool _darkTheme = false; // The boolean for the dark theme of the application
 
@@ -76,18 +80,8 @@ var photoField;
 
 /* Future which displays the details of the contact */
 Future<Contact> fetchContact(contactId, context, route) async {
-  final response = await http
-      .get(Uri.parse('https://contactup.dabarayao.com/contact/show/$contactId'))
-      .timeout(
-    const Duration(seconds: 1),
-    onTimeout: () {
-      // Time has run out, do what you wanted to do.
-      Navigator.of(context).pushNamedAndRemoveUntil(
-          route != null ? '/$route' : 'home', (route) => false);
-
-      throw ("big error 404"); // Request Timeout response status code
-    },
-  );
+  final response = await http.get(
+      Uri.parse('https://contactup.dabarayao.com/contact/show/$contactId'));
 
   if (response.statusCode == 200 || response.statusCode == 201) {
     // If the server did return a 200 OK response,
@@ -204,7 +198,7 @@ Email: $emailField
             ),
             PopupMenuButton(
               color: _darkTheme ? Color(0XFF1F1F30) : null,
-              onSelected: (value) {
+              onSelected: (value) async {
                 print("the value is ${value}");
 
                 if (value == "delete") {
@@ -230,13 +224,60 @@ Email: $emailField
                               style: TextStyle(color: Color(0xFFff474c))),
                         ),
                         TextButton(
-                          onPressed: () =>
-                              delContact(http.Client(), routesArg['id']),
+                          onPressed: () {
+                            // Test connectivity async Future
+                            checkInternetConnection().then((internet) {
+                              if (internet == false) {
+                                var snackBar = SnackBar(
+                                  content: Text(sysLng == "fr"
+                                      ? 'Vérifiez votre connexion internet'
+                                      : "Check your internet connexion"),
+                                  action: SnackBarAction(
+                                    label: 'Ok',
+                                    onPressed: () {
+                                      // Some code to undo the change.
+                                    },
+                                  ),
+                                );
+
+// Find the ScaffoldMessenger in the widget tree
+// and use it to show a SnackBar.
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
+                              } else {
+                                // check if there's network to reload the data
+                                http
+                                    .get(Uri.parse(
+                                        "https://contactup.dabarayao.com"))
+                                    .timeout(const Duration(seconds: 3))
+                                    .catchError((e) {
+                                  var snackBar = SnackBar(
+                                    content: Text(sysLng == "fr"
+                                        ? 'Vérifiez votre connexion internet'
+                                        : "Check your internet connexion"),
+                                    action: SnackBarAction(
+                                      label: 'Ok',
+                                      onPressed: () {
+                                        // Some code to undo the change.
+                                      },
+                                    ),
+                                  );
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      snackBar); // Finally, callback fires.
+                                });
+                              }
+                            });
+                            delContact(http.Client(), routesArg['id']);
+                          },
                           child: const Text('OK'),
                         ),
                       ],
                     ),
                   );
+
+                  await Future.delayed(
+                      const Duration(milliseconds: 5000), () => 42);
                 } else if (value == "edit") {
                   Navigator.pushNamed(context, '/editContact', arguments: {
                     'id': idField,
@@ -245,7 +286,7 @@ Email: $emailField
                     'email': emailField,
                     'photo': photoField == null
                         ? ""
-                        : "http://10.0.2.2:8000$photoField",
+                        : "https://contactup.dabarayao.com$photoField",
                     'phone': phoneField,
                   });
                 }
@@ -305,8 +346,9 @@ Email: $emailField
                                 SizedBox(
                                     height: 160,
                                     child: CachedNetworkImage(
-                                      imageUrl:
-                                          "http://10.0.2.2:8000${snapshot.data!.photo}",
+                                      imageUrl: snapshot.data!.photo != "aucun"
+                                          ? "https://contactup.dabarayao.com${snapshot.data!.photo}"
+                                          : "https://placehold.co/300x300/ffffff/1F1F30.png?text=${snapshot.data!.nom[0]}${snapshot.data!.prenoms[0]}",
                                       placeholder: (context, url) =>
                                           const CircularProgressIndicator(),
                                       errorWidget: (context, url, error) =>

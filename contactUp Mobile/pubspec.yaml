@@ -52,6 +52,7 @@ dependencies:
   email_validator: ^2.1.17
   connectivity_plus: ^3.0.2
   flutter_smart_dialog: ^4.6.2+1
+  easy_loading_button: ^0.3.2
 
 dev_dependencies:
   flutter_test:

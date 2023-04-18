@@ -172,13 +172,7 @@ Future<void> updateFav(favId, favorite) async {
 // A future to get all the contacts
 Future<List<Contact>> fetchContacts(http.Client client, context, lang) async {
   final response = await client
-      .get(Uri.parse('https://contactup.dabarayao.com/contact/list'), headers: {
-    HttpHeaders.contentTypeHeader: "application/json",
-    "Connection": "Keep-Alive",
-    "Keep-Alive": "timeout=2, max=1000"
-  }).timeout(
-    const Duration(seconds: 3),
-  );
+      .get(Uri.parse('https://contactup.dabarayao.com/contact/list'));
 
   // Use the compute function to run parsePhotos in a separate isolate.
   return compute(parseContacts, response.body);
@@ -221,8 +215,8 @@ class Contact {
       email: json['email'] as String,
       phone: json['phone'] as String,
       photo: json['photo'] ?? "aucun",
-      isFav: json['is_fav'] == 1 ? true : false,
-      isArch: json['is_arch'] == 1 ? true : false,
+      isFav: json['is_fav'] == "1" ? true : false,
+      isArch: json['is_arch'] == "1" ? true : false,
     );
   }
 }
@@ -400,7 +394,8 @@ class ContactList extends HookWidget {
                           } else {
                             // check if there's network to reload the data
                             http
-                                .get(Uri.parse("http://10.0.2.2:8000"))
+                                .get(Uri.parse(
+                                    "https://contactup.dabarayao.com"))
                                 .timeout(const Duration(seconds: 2))
                                 .catchError((e) {
                               var snackBar = SnackBar(
@@ -635,7 +630,7 @@ class ContactsItems extends HookWidget {
                       imageUrl: contacts[index].photo == "aucun"
                           ? ("https://placehold.co/300x300/f2b538/000000.png?text=${contacts[index].nom[0]}${contacts[index].prenoms[0]}"
                               "")
-                          : "http://10.0.2.2:8000${contacts[index].photo}",
+                          : "https://contactup.dabarayao.com${contacts[index].photo}",
                       placeholder: (context, url) =>
                           CircularProgressIndicator(),
                       errorWidget: (context, url, error) => Icon(
@@ -663,33 +658,15 @@ class ContactsItems extends HookWidget {
                         ),
                         onPressed: () {
                           // If there is network, the contact become favorite or else a snackbar error is shown
-                          http
-                              .get(
-                                  Uri.parse('https://contactup.dabarayao.com/'))
-                              .timeout(const Duration(seconds: 1))
-                              .catchError((e) {
-                            var snackBar = SnackBar(
-                              content: Text(lang == "fr"
-                                  ? 'Vérifiez votre connexion internet'
-                                  : "Check your internet connexion"),
-                              action: SnackBarAction(
-                                label: 'Ok',
-                                onPressed: () {
-                                  // Some code to undo the change.
-                                },
-                              ),
-                            );
+                          context.read<LoadContact>().changeAllContacts(
+                              fetchContacts(http.Client(), context, lang));
 
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
-                          }).whenComplete(() {
-                            updateFav(
-                              contacts[index].id,
-                              contacts[index].isFav,
-                            );
+                          updateFav(
+                            contacts[index].id,
+                            contacts[index].isFav,
+                          );
 
-                            Navigator.of(context).pushNamed('/');
-                          });
+                          Navigator.of(context).pushNamed('/');
                         }),
                   ));
               //return Image.network(contacts[index].photo);
@@ -820,7 +797,7 @@ class ContactsItems extends HookWidget {
                         imageUrl: contacts[index].photo == "aucun"
                             ? ("https://placehold.co/300x300/f2b538/000000.png?text=${contacts[index].nom[0]}${contacts[index].prenoms[0]}"
                                 "")
-                            : "${contacts[index].photo}",
+                            : "https://contactup.dabarayao.com${contacts[index].photo}",
                         placeholder: (context, url) =>
                             CircularProgressIndicator(),
                         errorWidget: (context, url, error) => Icon(
@@ -849,32 +826,14 @@ class ContactsItems extends HookWidget {
                                         : Color(0XFF1F1F30),
                           ),
                           onPressed: () {
+                            context.read<LoadContact>().changeAllContacts(
+                                fetchContacts(http.Client(), context, lang));
                             // If there is network, the datas are saved or else an alert error is shown
-                            http
-                                .get(Uri.parse(
-                                    'https://contactup.dabarayao.com/'))
-                                .timeout(const Duration(seconds: 1))
-                                .catchError((e) {
-                              var snackBar = SnackBar(
-                                content: Text(lang == "fr"
-                                    ? 'Vérifiez votre connexion internet'
-                                    : "Check your internet connexion"),
-                                action: SnackBarAction(
-                                  label: 'Ok',
-                                  onPressed: () {
-                                    // Some code to undo the change.
-                                  },
-                                ),
-                              );
 
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
-                            }).whenComplete(() {
-                              updateFav(
-                                  contacts[index].id, contacts[index].isFav);
+                            updateFav(
+                                contacts[index].id, contacts[index].isFav);
 
-                              Navigator.of(context).pushNamed('/');
-                            });
+                            Navigator.of(context).pushNamed('/');
                           }),
                     ))
                 : Visibility(
@@ -987,7 +946,7 @@ class ContactsItems extends HookWidget {
                             imageUrl: contacts[index].photo == "aucun"
                                 ? ("https://placehold.co/300x300/f2b538/000000.png?text=${contacts[index].nom[0]}${contacts[index].prenoms[0]}"
                                     "")
-                                : "${contacts[index].photo}",
+                                : "https://contactup.dabarayao.com${contacts[index].photo}",
                             placeholder: (context, url) =>
                                 CircularProgressIndicator(),
                             errorWidget: (context, url, error) => Icon(
@@ -1016,32 +975,15 @@ class ContactsItems extends HookWidget {
                                             : Color(0XFF1F1F30),
                               ),
                               onPressed: () {
+                                context.read<LoadContact>().changeAllContacts(
+                                    fetchContacts(
+                                        http.Client(), context, lang));
                                 // If there is network, the datas are saved or else an alert error is shown
-                                http
-                                    .get(Uri.parse(
-                                        'https://contactup.dabarayao.com/'))
-                                    .timeout(const Duration(seconds: 1))
-                                    .catchError((e) {
-                                  var snackBar = SnackBar(
-                                    content: Text(lang == "fr"
-                                        ? 'Vérifiez votre connexion internet'
-                                        : "Check your internet connexion"),
-                                    action: SnackBarAction(
-                                      label: 'Ok',
-                                      onPressed: () {
-                                        // Some code to undo the change.
-                                      },
-                                    ),
-                                  );
 
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBar);
-                                }).whenComplete(() {
-                                  updateFav(contacts[index].id,
-                                      contacts[index].isFav);
+                                updateFav(
+                                    contacts[index].id, contacts[index].isFav);
 
-                                  Navigator.of(context).pushNamed('/');
-                                });
+                                Navigator.of(context).pushNamed('/');
                               }),
                         )),
                   );
